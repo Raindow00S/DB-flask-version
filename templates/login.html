@@ -93,7 +93,7 @@
                             $("#message").html('Incorrect username or password. ');
                         } else if (data == "wrong") {
                             $("#message").html('Incorrect username or password. ');
-                        } else {    // 【若用户名和密码正确……发生了啥？】
+                        } else {    // 若用户名和密码正确，向/user路由发送表单信息
                             $("#hint").val(name)
                             $("#form").submit()
                         }    
