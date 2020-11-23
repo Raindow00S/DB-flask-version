@@ -78,18 +78,45 @@ def login_success():
 
 @app.route('/myinfo', methods=['GET','POST'])
 def showInfo():
-    logger.info("全局变量userID："+userID)
-    logger.info("全局变量identity："+identity)
-    # 根据身份和账号(全局变量)，从数据库取出和身份对应的个人信息，传给前端
-    # 若数据库正常，不会出现找不着的情况
-    db_info = db.get_info(userID, identity) # 返回的是个字典
-    logger.info("获得的信息："+str(db_info))
-    
-    # 传送数据给前端
-    # 【老冯，拆字典的任务就交给你了！】
-    return render_template('myinfo.html',
-                            identity=identity,
-                            info=db_info)
+    if request.method == 'GET':
+        logger.info("全局变量userID："+userID)
+        logger.info("全局变量identity："+identity)
+        # 根据身份和账号(全局变量)，从数据库取出和身份对应的个人信息，传给前端
+        # 若数据库正常，不会出现找不着的情况
+        db_info = db.get_info(userID, identity) # 返回的是个字典
+        logger.info("获得的信息："+str(db_info))
+        
+        # 传送数据给前端
+        # 【老冯，拆字典的任务就交给你了！】
+        return render_template('myinfo.html',
+                                identity=identity,
+                                info=db_info)
+
+@app.route('/allgroup', methods=['GET','POST'])
+def allGroup():
+    if request.method == 'GET':
+        db_groups = db.get_all_groups()
+        logger.info("获得的所有课题组信息："+str(db_groups))
+
+        return render_template('allgroup.html',
+                                groups=db_groups)
+    else:   # 当按下加入按钮时，发送过来申请对象课题组的老师ID
+        leaderID = request.form.get('leaderID', default='undefined')    # 课题组所属教师ID
+        groupID = request.form.get('groupID',default='undefined')
+        logger.info("申请加入的课题组所属教师ID："+leaderID)
+        logger.info("申请加入的课题组ID："+groupID)
+        # 学生ID在全局变量里面
+        # 【TO DO 查找学生是否已在该课题组中，不在则生成申请记录】
+        # 【若已在，返回joined】
+        # 【若不在，则生成申请记录存入数据库，返回applied】
+        db_group = db.get_group(userID,groupID)
+        if not db_group:    # 若不在
+            logger.info("插入加入课题组申请："+userID+"-->"+leaderID)
+            db.add_apply_for_group(userID, leaderID)
+            return 'applied'
+        else:
+            logger.info("学生"+userID+"已经加入课题组"+groupID)
+            return 'joined'
 
 
 

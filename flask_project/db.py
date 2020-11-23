@@ -50,7 +50,7 @@ def get_pass(username):
     else:   # 若结果不为空，返回第一条
         return password[0][0]
 
-# 【TO DO 根据身份和账号(全局变量)，从数据库取出和身份对应的个人信息，传给前端】
+#  根据身份和账号(全局变量)，从数据库取出和身份对应的个人信息
 def get_info(userID, identity):
     try:
         conn = get_connect()    # 建立连接和游标
@@ -84,6 +84,60 @@ def get_info(userID, identity):
     # 返回字典
     return info_dict
 
-if __name__ == '__main__':
-    save_user("xhh", "123")
-    print(get_pass("xhh"))
+# 获得全部课题组的信息
+def get_all_groups():
+    try:
+        conn = get_connect()    # 建立连接和游标
+        cursor = conn.cursor()
+        cursor.execute('select * from research_group')
+        groups = cursor.fetchall()    # 元组列表
+    except Exception as e:  # 报错
+        print(e)
+    finally:
+        cursor.close()  # 关闭游标和连接
+        conn.close()
+    
+    # 添加属性名
+    attr = ["所属教师","编号","名称","类型"]
+    groups.insert(0,attr)
+    
+    return groups
+
+# 插入申请加入课题组的记录
+def add_apply_for_group(studentID, leaderID):
+    try:
+        conn = get_connect()    # 建立连接和游标
+        cursor = conn.cursor()
+        cursor.execute('insert into apply_for_group(学号, 课题组所属教师职工号) values(%s, %s)', (studentID, leaderID))
+        conn.commit()
+    except Exception as e:  # 报错
+        print(e)
+        if conn:
+            conn.rollback()     # 回溯
+    finally:
+        cursor.close()  # 关闭游标和连接
+        conn.close()
+
+# 查找该学生是否已经加入指定课题组
+def get_group(studentID,groupID):
+    try:
+        conn = get_connect()    # 建立连接和游标
+        cursor = conn.cursor()
+        cursor.execute('select * from student_group where 学号 = %s and 课题组编号 = %s', (studentID,groupID))
+        group = cursor.fetchall()
+        print(group)
+    except Exception as e:  # 报错
+        print(e)
+    finally:
+        cursor.close()  # 关闭游标和连接
+        conn.close()
+    if not group:   # 若该学生没有加入该课题组
+        print("该学生没有加入该课题组")
+        return group
+    else:   # 若加入
+        return groupID
+
+
+# if __name__ == '__main__':
+#     save_user("xhh", "123")
+#     print(get_pass("xhh"))

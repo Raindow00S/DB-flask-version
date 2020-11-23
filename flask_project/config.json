@@ -3,6 +3,6 @@
     "port": "5505",
     "debug": "True",
     "user": "root",
-    "password": "",
+    "password": "password",
     "database": "irs"
 }
