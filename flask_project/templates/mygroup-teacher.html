@@ -1,0 +1,121 @@
+<!-- group=db_group,
+membersInfo=membersInfo -->
+
+<h1>我的课题组信息</h1>
+<table id="group-info-table" border="1">
+    <tr>
+        <td>编号:</td>
+        <td id="group-id">{{group["编号"]}}</td>
+    </tr>
+    <tr>
+        <td>名称:</td>
+        <td id="group-name">{{group["名称"]}}</td>
+    </tr>
+    <tr>
+        <td>类型:</td>
+        <td id="group-type">{{group["类型"]}}</td>
+    </tr>
+</table>
+<input type="button" id="edit" value="编辑课题组信息">
+
+<h1>课题组成员</h1>
+{% for item in membersInfo %}
+    <div>
+        {% for key, value in item.items() %}
+            <span>{{ key }}:</span><span>{{ value }}</span>
+        {% endfor %}
+        <button type="button" class="delete-member">删除</button>
+    </div>
+{% endfor %}
+<button type="button" class="btn" id="add-member">添加</button>
+<div id="all-students-list"></div>
+
+<script src="../static/js/jquery-1.11.1.min.js"></script>
+<script>
+    $(function() {
+        $('.delete-member').click(function() {    // 因为不止一个删除键，所以使用类而不是ID
+            var memberID_content = $(this).parent().children().eq(1);
+            memberID_content.css('background-color', 'red');
+            var memberID = memberID_content.text();
+            var groupID_content = $('#group-id');
+            groupID_content.css('background-color', 'blue');
+            var groupID = groupID_content.text();   // 用了超级麻烦的方法……
+
+            $.ajax({
+                async:"fales",
+                type:"POST",
+                url:"/mygroup-teacher",
+                data: {
+                    "memberID":memberID,
+                    "groupID":groupID,
+                    "action":"delete"   // 指示操作是删除还是添加成员
+                },
+                success:function(data) {
+                    alert("学生已从课题组中移除！")
+                    location.href="/mygroup-teacher";  // 刷新页面
+                }
+            });
+        });
+
+        $('#edit').click(function() {
+            var name = $('#group-name');
+            var name_old = name.text();
+            var type = $('#group-type');
+            var type_old = type.text();
+            name.html("<input type='text' id='input-name' value="+name_old+">");
+            type.html("<input type='text' id='input-type' value="+type_old+">");
+            $('#input-type').css('background-color', 'blue');
+            $(this).val("保存");    // 改变按钮文字
+
+            // 修改信息后点下保存按钮
+            $(this).click(function() {
+                // 获取新输入的信息
+                var name = $('#input-name');
+                var type = $('#input-type');
+                var name_new = name.val();
+                var type_new = type.val();
+                var groupID = $('#group-id').text();
+
+                // 传回路由
+                $.ajax({
+                    async:"fales",
+                    type:"POST",
+                    url:"/mygroup-teacher",
+                    data: {
+                        "groupID":groupID,
+                        "newName":name_new,
+                        "newType":type_new,
+                        "action":"edit"
+                    },
+                    success:function(data) {
+                        $('#group-name').html(name_new);
+                        $('#group-type').html(type_new);
+                        $(this).val("编辑课题组信息");
+                        alert("课题组信息已修改！")
+                        // location.href="/mygroup-teacher";  // 刷新页面
+                    }
+                });
+            });
+        });
+        
+        $('#add-member').click(function() {
+            var groupID = $('#group-id').text();
+
+            $.ajax({
+                async:"fales",
+                type:"POST",
+                url:"/mygroup-teacher",
+                data: {
+                    "groupID":groupID,
+                    "action":"add"
+                },
+                success:function(data) {
+                    // alert(data['0']);
+                    // alert(data['1']);
+                    $('#all-students-list').html(data[0]);
+                }
+            });
+        });
+        
+    });
+</script>

@@ -7,7 +7,7 @@ import logging
 logging.basicConfig(level=logging.INFO, format='127.0.0.1 - - [%(asctime)s - %(name)s - %(levelname)s - %(message)s]')
 logger = logging.getLogger(__name__)
 
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, jsonify
 import json
 import util
 import db
@@ -15,10 +15,10 @@ import db
 # 【试图设置全局变量，以在整个登录过程中保存信息方便查找】
 # userID = "0" # 账号（学生-学号；教师-职工号；仪器管理员-职工号）
 # identity = "undefined"  # 身份（学生/教师/仪器管理员）
-userID = "01"   # 学生测试
-identity = "student"
-# userID = "02"   # 老师测试
-# identity = "faculty"
+# userID = "01"   # 学生测试
+# identity = "student"
+userID = "02"   # 老师测试
+identity = "faculty"
 # userID = "03"   # 仪器管理员测试
 # identity = "equipment_manager"
 
@@ -109,7 +109,7 @@ def allGroup():
         # 【TO DO 查找学生是否已在该课题组中，不在则生成申请记录】
         # 【若已在，返回joined】
         # 【若不在，则生成申请记录存入数据库，返回applied】
-        db_group = db.get_group(userID,groupID)
+        db_group = db.get_group_by_student(userID,groupID)
         if not db_group:    # 若不在
             logger.info("插入加入课题组申请："+userID+"-->"+leaderID)
             db.add_apply_for_group(userID, leaderID)
@@ -118,6 +118,61 @@ def allGroup():
             logger.info("学生"+userID+"已经加入课题组"+groupID)
             return 'joined'
 
+# 显示教师的课题组信息及人员信息
+@app.route('/mygroup-teacher', methods=['GET','POST'])
+def teacherGroup():
+    if request.method == 'GET':
+        # 显示教师的课题组信息
+        db_group = db.get_group_by_teacher(userID)
+        # logger.info("db_group:"+str(db_group))
+        if db_group:
+            group_id = db_group["编号"]
+            # logger.info("group_id:"+str(group_id))
+            # 学生人员信息
+            membersInfo = db.get_students_by_group(group_id)
+            # logger.info("membersInfo:"+str(membersInfo))
+        else: 
+            membersInfo=[]
+        
+        return render_template('mygroup-teacher.html',
+                                group=db_group,
+                                membersInfo=membersInfo)
+    
+    else:   # 添加/删除了学生 或 修改了课题组信息
+        # 总之先判断一下是什么操作啦
+        action = request.form.get('action', default='undefined')
+        # 若操作为删除学生
+        if action == "delete":
+            memberID = request.form.get('memberID', default='undefined')
+            groupID = request.form.get('groupID', default='undefined')
+            logger.info("memberID:"+str(memberID)+" groupID:"+str(groupID))
+
+            db.remove_student_from_group(memberID, groupID)
+            return "deleted"
+        # 若操作为编辑课题组信息
+        elif action=="edit":
+            groupID = request.form.get("groupID",default="undefined")
+            newName = request.form.get("newName",default="undefined")
+            newType = request.form.get("newType",default="undefined")
+            logger.info("groupID:"+str(groupID)+" newName:"+str(newName)+" newType:"+str(newType))
+            db.update_group_info(groupID,newName,newType)
+            return "updated"
+        else:
+            all_students = db.get_all_students()
+            print(type(all_students))
+            logger.info("all_students:"+str(all_students)) # 我晕了……这是个列表，没法return
+
+            index = []
+            for i in range(len(all_students)):
+                index.append(i)
+            logger.info("index:"+str(index))
+            d = dict(zip(index,all_students))
+            logger.info("d:"+str(d))
+
+            return jsonify(d)
+
+
+        
 
 
 if __name__ == '__main__':
