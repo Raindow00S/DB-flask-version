@@ -1,54 +1,60 @@
 # -*- coding: utf-8 -*-
-'''
-建表语句
-create table users(
-    id int not null auto_increment, 
-    name varchar(100) not null,
-    pass varchar(100) not null,
-    primary key(id)
-);
-'''
-import mysql.connector      # pip install mysql-connector
+
+# 用于输出运行日志
+import logging
+logging.basicConfig(level=logging.INFO, format='127.0.0.1 - - [%(asctime)s - %(name)s - %(levelname)s - %(message)s]')
+logger = logging.getLogger(__name__)
+
+# 数据库连接信息
+import mysql.connector
 import util
-config = util.get_config()  # mysql数据库的连接信息
+config = util.get_config()
 USER = config["user"]
 PASSWORD = config["password"]
 DATABASE = config["database"] 
 
-def get_connect():  # 连接mysql数据库
+# 连接mysql数据库
+def get_connect():
     conn = mysql.connector.connect(user=USER, password=PASSWORD, database=DATABASE)    
     return conn
 
-def save_user(username, password):
-    try:
-        conn = get_connect()    # 连接mysql数据库
-        cursor = conn.cursor()  # 【新建mysql游标？】可以理解为，命令行中，执行sql语句之前，先要有一个光标行，在光标行中进行操作
-        cursor.execute('insert into users(name, pass) values(%s, %s)', (username, password))    # 存入参数传来的用户名及密码
-        conn.commit()   # 数据表内容有更新，必须使用到该语句
-    except Exception as e:  # 若发生错误
-        print(e)    # 打印错误信息
-        if conn:    # 【嗯……若连接还在？】
-            conn.rollback()     # 回溯
-    finally:
-        cursor.close()  # 关闭游标
-        conn.close()    # 关闭mysql数据库连接
 
-def get_pass(username):
+# ==============TODO留作参考注册函数=======================
+# def save_user(username, password):
+#     try:
+#         conn = get_connect()    # 连接mysql数据库
+#         cursor = conn.cursor()  # 新建游标
+#         cursor.execute('insert into users(name, pass) values(%s, %s)', (username, password))    # 存入参数传来的用户名及密码
+#         conn.commit()   # 数据表内容有更新，必须使用到该语句
+#     except Exception as e:  # 若发生错误
+#         print(e)    # 打印错误信息
+#         if conn:    # 【嗯……若连接还在？】
+#             conn.rollback()     # 回溯
+#     finally:
+#         cursor.close()  # 关闭游标
+#         conn.close()    # 关闭mysql数据库连接
+
+# 传入用户账号，确定登录是否成功，传回全局变量
+def get_user(username):
+    logger.info("进入get_user函数")
     try:
-        conn = get_connect()    # 建立连接和游标
+        conn = get_connect()
         cursor = conn.cursor()
         # 这里使用(username)会报错【可是为啥嘞】
-        cursor.execute('select pass from users where name = %s', (username,))   # 通过用户名查询密码
-        password = cursor.fetchall()    # 存储所有查询出来的密码
-    except Exception as e:  # 报错
+        cursor.execute('select * from 账号信息表 where 账号 = %s', (username,))   # 通过用户名查询密码
+        user = cursor.fetchall()    # 存储所有查询出来的密码
+        logger.info("查询结果："+str(user))
+    except Exception as e:
         print(e)        
     finally:
-        cursor.close()  # 关闭游标和连接
+        cursor.close()
         conn.close()
-    if not password:    # 若查询结果为空？
-        return password
-    else:   # 若结果不为空，返回第一条
-        return password[0][0]
+
+    # 若查询结果为空->账号不存在，登录失败，返回空列表
+    if not user:
+        return user
+    else:   # 若结果不为空->返回一行（元组）
+        return user[0]
 
 #  根据身份和账号(全局变量)，从数据库取出和身份对应的个人信息
 def get_info(userID, identity):
