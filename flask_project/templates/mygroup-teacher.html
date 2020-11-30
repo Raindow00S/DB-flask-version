@@ -57,66 +57,59 @@
             </ul>
         </div>
         <!--右侧-->
-    <div class="InquireSelectTable">
-        <table class="PublicTableCss" id="group-info-table">
-            <tr>
-                <td>编号:</td>
-                <td id="group-id">{{group["编号"]}}</td>
-            </tr>
-            <tr>
-                <td>名称:</td>
-                <td id="group-name">{{group["名称"]}}</td>
-            </tr>
-            <tr>
-                <td>类型:</td>
-                <td id="group-type">{{group["类型"]}}</td>
-            </tr>
-        </table>
-    </div>
-        <input type="button" id="edit" value="编辑课题组信息">
-        <h1>课题组成员</h1>
-        {% for item in membersInfo %}
-            <div>
-                {% for key, value in item.items() %}
-                    <span>{{ key }}:</span><span>{{ value }}</span>
-                {% endfor %}
-                <div class="PublicTableBtnIcon Color4Btn Js_delete">
-                    <i class="iconfont icon-shanchu"></i>
-                    <button type="button" class="delete-member">删除</button>
-                    <!--<span>删除</span>-->
-                </div>
-                
-            </div>
-        {% endfor %}
-        <div class="PublicBtnIcon Color2Btn fr Js_edit">
-            <i class="iconfont icon-changyongtubiao-mianxing-"></i>
-            <!--<span>添加</span>-->
-            <button type="button" class="btn" id="add-member">添加</button>
-        </div>
-        
-        <div id="all-students-list"></div>        
+        <div class="RightBox Js_RightBox">
+            <div class="PublicContentBox">
 
-                     <!--分页-->
-                    <div class="PageNumber">
-                        <div class="NumbersBox">
-                            <div class="LeftArrow">
-                                上一页
-                            </div>
-                            <ul>
-                                <li class="Select">1</li>
-                                <li class="">2</li>
-                                <li class="">...</li>
-                                <li class="">4</li>
-                                <li class="">5</li>
-                            </ul>
-                            <div class="RightArrow ">
-                                下一页
-                            </div>
-                        </div>
+                <div class="InquireSelectTable">
+                    <table class="PublicTableCss" id="group-info-table">
+                    <tr>
+                        <td>编号:</td>
+                        <td id="group-id">{{group["编号"]}}</td>
+                    </tr>
+                    <tr>
+                        <td>名称:</td>
+                        <td id="group-name">{{group["名称"]}}</td>
+                    </tr>
+                    <tr>
+                        <td>类型:</td>
+                        <td id="group-type">{{group["类型"]}}</td>
+                    </tr>
+                    </table>
+                </div>
+
+                <div class="PublicBtnIcon Color2Btn fr Js_edit">
+                    <i class="iconfont icon-changyongtubiao-mianxing-"></i>
+                    <input type="button" id="edit" value="编辑课题组信息">
+                </div>
+                <br/><br/><br/><br/>
+                <hr />
+
+                <h1>课题组成员</h1>
+                {% for item in membersInfo %}
+                <div>
+                    {% for key, value in item.items() %}
+                        <span>{{ key }}:</span><span>{{ value }}</span>
+                    {% endfor %}
+                    <div class="PublicTableBtnIcon Color4Btn Js_delete">
+                        <i class="iconfont icon-shanchu"></i>
+                        <button type="button" class="delete-member">删除</button>
+                        <!--<span>删除</span>-->
                     </div>
-
-
+                
                 </div>
+                {% endfor %}
+
+                <div class="PublicBtnIcon Color2Btn fr Js_edit">
+                    <i class="iconfont icon-changyongtubiao-mianxing-"></i>
+                    <!--<span>添加</span>-->
+                    <button type="button" class="btn" id="add-member">添加</button>
+                </div>
+        
+                <div id="all-students-list"></div>        
+
+                     
+
+
             </div>
 
         </div>
