@@ -90,7 +90,7 @@ def get_group_stu(stuID):
     finally:
         cursor.close();conn.close()
 
-    if not groups:  # 若还没有加入的课题组
+    if not groups:  # TODO若还没有加入的课题组
         return groups
     else:   # 若有加入的课题组
         return groups
@@ -98,8 +98,7 @@ def get_group_stu(stuID):
 # 获得全部课题组的信息
 def get_all_groups():
     try:
-        conn = get_connect()    # 建立连接和游标
-        cursor = conn.cursor()
+        conn = get_connect();cursor = conn.cursor()
         cursor.execute('select * from research_group')
         groups = cursor.fetchall()    # 元组列表
     except Exception as e:  # 报错
@@ -113,6 +112,43 @@ def get_all_groups():
     groups.insert(0,attr)
     
     return groups
+
+# TODO一个总的获取课题组信息的函数
+# opt:查询方式 all-查询全部课题组 in-使用stuID,查找学生在的课题组 out-查找学生不在的课题组 teacher-使用teaID,查找老师的课题组
+# stuID:学号
+# teaID:老师职工号
+def get_groups(opt = 'all', stuID = 'undefined', teaID = 'undefined'):
+    try:
+        conn = get_connect();cursor = conn.cursor()
+        
+        if opt == 'all':
+            cursor.execute('select * from research_group')
+        elif opt == 'in':
+            cursor.execute('select * from 课题组表 where 编号 in (select 课题组编号 from 课题成员表 where 学号 = %s)', (stuID,))
+        elif opt == 'out':
+            # TODO这里查询not in没有效果
+            print("opt:out")
+            cursor.execute('select * from 课题组表 where 编号 not in (select 课题组编号 from 课题成员表 where 学号 = %s)', (stuID,))
+            # cursor.execute('select * from 课题组表 where not exists (select 课题组编号 from 课题成员表 where 学号 = %s and 编号 = 课题组编号)', (stuID,))
+        elif opt == 'teacher':
+            cursor.execute('select * from 课题组表 where 所属教师 = %s', (teaID,))
+        else:
+            print("不合法参数")
+        groups = cursor.fetchall()
+        logger.info("get_groups查询结果："+str(groups))
+    except Exception as e:
+        print(e)
+    finally:
+        cursor.close();conn.close()
+    
+    # 添加属性名
+    attr = ["所属教师","编号","名称","类型"]
+    groups.insert(0,attr)
+    
+    return groups
+
+
+
 
 # 插入申请加入课题组的记录
 def add_apply_for_group(studentID, leaderID):
@@ -163,30 +199,26 @@ def get_group_by_teacher(teacherID):
         print("该教师不属于任何课题组！")
         return group
     else:   # 若该教师有课题组，则返回属性（字典）
-        attr = ("所属教师","编号","名称","类型")
+        attr = ("编号","所属教师","名称","类型")
         group_dict = dict(zip(attr, group))
         return group_dict
 
 # 查课题组中的所有学生的个人信息
 def get_students_by_group(groupID):
     try:
-        conn = get_connect()
-        cursor = conn.cursor()
-        cursor.execute('select 学号 from student_group where 课题组编号 = %s', (groupID,))
+        conn = get_connect();cursor = conn.cursor()
+        cursor.execute('select 学号 from 课题成员表 where 课题组编号 = %s', (groupID,))
         membersID = cursor.fetchall()   # 数据的条数对应该课题组中学生的人数
+        logger.info("get_students_by_group查询结果："+str(membersID))
     except Exception as e:
         print(e)
     finally:
-        cursor.close()
-        conn.close()
+        cursor.close();conn.close()
 
     membersInfo = []
     # 通过学号取出每一个学生的个人信息
-    # print("membersID是元组？") # YES是元组列表：[('01',), ('05',)]
-    # print(membersID)
     for ID in membersID:
         membersInfo.append(get_info(ID[0],"student"))
-    # print(membersInfo)
     return membersInfo
 
 # 删除学生与课题组的联系

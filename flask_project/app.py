@@ -101,25 +101,31 @@ def showInfo():
 
 # ================学生=====================
 # ================我的课题组=====================
+# 展示已加入的所有课题组
 @app.route('/mygroup-student', methods=['GET'])
-def  mygroup_student():
+def  myGroupStudent():
     glo_userID = glo.get_value('glo_userID')
-    db_groups = db.get_group_stu(glo_userID)
+    #db_groups = db.get_group_stu(glo_userID)
+    db_groups = db.get_groups(opt='in',stuID=glo_userID)
     logger.info("<数据库传回> "+str(db_groups))
 
     return render_template('mygroup-student.html',
                            groups = db_groups)
 
-
-
+# ================TODO加入课题组=====================
+# 展示所有课题组,发送加入课题组请求
+# TODO另一种方式是只展示未加入的课题组,但使用not in查询失效的问题尚未解决
 @app.route('/allgroup', methods=['GET', 'POST'])
 def allGroup():
     if request.method == 'GET':
-        db_groups = db.get_all_groups()
-        logger.info("获得的所有课题组信息："+str(db_groups))
+        # db_groups = db.get_all_groups()
+        # db_groups = db.get_groups(opt='out')
+        db_groups = db.get_groups(opt='all')
+        logger.info("<数据库传回> "+str(db_groups))
 
         return render_template('allgroup.html',
                                groups=db_groups)
+    # TODO按钮交互
     else:   # 当按下加入按钮时，发送过来申请对象课题组的老师ID
         leaderID = request.form.get(
             'leaderID', default='undefined')    # 课题组所属教师ID
@@ -144,21 +150,25 @@ def allGroup():
 def teacherGroup():
     if request.method == 'GET':
         # 显示教师的课题组信息
-        db_group = db.get_group_by_teacher(userID)
-        # logger.info("db_group:"+str(db_group))
+        # db_group = db.get_group_by_teacher(userID)
+        db_group = db.get_groups(opt='teacher',teaID=glo.get_value('glo_userID'))
+        logger.info("<数据库传回db_group> "+str(db_group))
         if db_group:
-            group_id = db_group["编号"]
+            #group_id = db_group["编号"]
             # logger.info("group_id:"+str(group_id))
+            group_id = db_group[1][0]
             # 学生人员信息
             membersInfo = db.get_students_by_group(group_id)
-            # logger.info("membersInfo:"+str(membersInfo))
+            logger.info("<数据库传回membersInfo> "+str(membersInfo))
         else:
             membersInfo = []
 
+        # TODO老师课题组信息数据格式与前端不符合
         return render_template('mygroup-teacher.html',
                                group=db_group,
                                membersInfo=membersInfo)
 
+    # TODO按钮交互
     else:   # 添加/删除了学生 或 修改了课题组信息
         # 总之先判断一下是什么操作啦
         action = request.form.get('action', default='undefined')
