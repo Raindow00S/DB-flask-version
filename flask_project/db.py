@@ -18,7 +18,6 @@ def get_connect():
     conn = mysql.connector.connect(user=USER, password=PASSWORD, database=DATABASE)    
     return conn
 
-
 # ==============TODO留作参考注册函数=======================
 # def save_user(username, password):
 #     try:
@@ -36,48 +35,38 @@ def get_connect():
 
 # 传入用户账号，确定登录是否成功，传回全局变量
 def get_user(username):
-    logger.info("进入get_user函数")
     try:
-        conn = get_connect()
-        cursor = conn.cursor()
-        # 这里使用(username)会报错【可是为啥嘞】
-        cursor.execute('select * from 账号信息表 where 账号 = %s', (username,))   # 通过用户名查询密码
-        user = cursor.fetchall()    # 存储所有查询出来的密码
-        logger.info("查询结果："+str(user))
+        conn = get_connect();cursor = conn.cursor()
+        cursor.execute('select * from 账号信息表 where 账号 = %s', (username,)) # 这里使用(username)会报错【可是为啥嘞】
+        user = cursor.fetchall()
+        logger.info("get_user查询结果："+str(user))
     except Exception as e:
         print(e)        
     finally:
-        cursor.close()
-        conn.close()
+        cursor.close();conn.close()
 
-    # 若查询结果为空->账号不存在，登录失败，返回空列表
-    if not user:
+    if not user: # 若查询结果为空->账号不存在，登录失败，返回空列表
         return user
-    else:   # 若结果不为空->返回一行（元组）
+    else: # 若结果不为空->返回一行（元组）
         return user[0]
 
-#  根据身份和账号(全局变量)，从数据库取出和身份对应的个人信息
+#  根据身份和账号(全局变量)，查询和身份对应的个人信息
 def get_info(userID, identity):
-    # print("get_info()-userID:"+userID)
     try:
-        conn = get_connect()    # 建立连接和游标
-        cursor = conn.cursor()
-        # 通过身份判断查询哪个关系表
+        conn = get_connect();cursor = conn.cursor()
+
         if identity == 'student':
-            # print("身份校对：student")
-            cursor.execute('select * from student where 学号 = %s', (userID,))
+            cursor.execute('select * from 学生表 where 学号 = %s', (userID,))
         elif identity == 'faculty':
-            # print("身份校对：faculty")
-            cursor.execute('select * from faculty where 职工号 = %s', (userID,))
+            cursor.execute('select * from 老师表 where 职工号 = %s', (userID,))
         else:
-            # print("身份校对：equipment_manager")
-            cursor.execute('select * from equipment_manager where 职工号 = %s', (userID,))
-        info = cursor.fetchone()    # 正常情况下，会查询出一条数据，只取这一条即可（数据类型为元组）
-    except Exception as e:  # 报错
+            cursor.execute('select * from 仪器管理员表 where 职工号 = %s', (userID,))
+        info = cursor.fetchone()
+        logger.info("get_info查询结果："+str(info))
+    except Exception as e:
         print(e)
     finally:
-        cursor.close()  # 关闭游标和连接
-        conn.close()
+        cursor.close();conn.close()
     
     # 将元组中的数据和属性名拼接成字典 属性名:属性值
     if identity == 'student':
@@ -86,9 +75,7 @@ def get_info(userID, identity):
         attr = ["职工号", "姓名", "职称"]
     else:
         attr = ["职工号", "姓名"]
-
     info_dict = dict(zip(attr, info))
-    # 返回字典
     return info_dict
 
 # 获得全部课题组的信息
