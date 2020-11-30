@@ -78,6 +78,23 @@ def get_info(userID, identity):
     info_dict = dict(zip(attr, info))
     return info_dict
 
+# 传入学号,查询该学生所在的所有课题组
+def get_group_stu(stuID):
+    try:
+        conn = get_connect();cursor = conn.cursor()
+        cursor.execute('select * from 课题组表 where 编号 in (select 课题组编号 from 课题成员表 where 学号 = %s)', (stuID,))
+        groups = cursor.fetchall()
+        logger.info("get_group_stu查询结果："+str(groups))
+    except Exception as e:
+        print(e)        
+    finally:
+        cursor.close();conn.close()
+
+    if not groups:  # 若还没有加入的课题组
+        return groups
+    else:   # 若有加入的课题组
+        return groups
+
 # 获得全部课题组的信息
 def get_all_groups():
     try:

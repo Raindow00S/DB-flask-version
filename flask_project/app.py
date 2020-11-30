@@ -86,7 +86,7 @@ def login():
             return 'right'
 
 # ================个人信息页(三个身份共用)=====================
-@app.route('/myinfo', methods=['GET', 'POST'])
+@app.route('/myinfo', methods=['GET'])
 def showInfo():
     # 取个人信息
     glo_userID = glo.get_value('glo_userID')
@@ -99,7 +99,19 @@ def showInfo():
                            identity=glo_identity,
                            info=db_info)
 
-# ================个人信息页(三个身份共用)=====================
+# ================学生=====================
+# ================我的课题组=====================
+@app.route('/mygroup-student', methods=['GET'])
+def  mygroup_student():
+    glo_userID = glo.get_value('glo_userID')
+    db_groups = db.get_group_stu(glo_userID)
+    logger.info("<数据库传回> "+str(db_groups))
+
+    return render_template('mygroup-student.html',
+                           groups = db_groups)
+
+
+
 @app.route('/allgroup', methods=['GET', 'POST'])
 def allGroup():
     if request.method == 'GET':
