@@ -127,7 +127,7 @@ def get_groups(opt = 'all', stuID = 'undefined', teaID = 'undefined'):
         else:
             print("不合法参数")
         groups = cursor.fetchall()
-        logger.info("get_groups查询结果："+str(groups))
+        # logger.info("get_groups查询结果："+str(groups))
     except Exception as e:
         print(e)
     finally:
@@ -135,63 +135,150 @@ def get_groups(opt = 'all', stuID = 'undefined', teaID = 'undefined'):
     
     return wrap.wrap_groups(groups)
 
-
-
-
 # 插入申请加入课题组的记录
-def add_apply_for_group(studentID, leaderID):
+def add_apply_for_group(stuID, leaderID):
     try:
-        conn = get_connect()    # 建立连接和游标
-        cursor = conn.cursor()
-        cursor.execute('insert into apply_for_group(学号, 课题组所属教师职工号) values(%s, %s)', (studentID, leaderID))
+        conn = get_connect();cursor = conn.cursor()
+        cursor.execute('insert into 课题申请记录表(学号, 职工号) values(%s, %s)', (stuID, leaderID))
         conn.commit()
-    except Exception as e:  # 报错
+        logger.info("插入课题组申请："+stuID+" --> "+leaderID)
+    except Exception as e:
         print(e)
-        if conn:
-            conn.rollback()     # 回溯
+        if conn: conn.rollback()
     finally:
-        cursor.close()  # 关闭游标和连接
-        conn.close()
+        cursor.close();conn.close()
 
-# 查找该学生是否已经加入指定课题组
-def get_group_by_student(studentID,groupID):
+# 一个总的获取仪器信息的函数
+# opt:查询方式 qual-使用stuID,查找学生有操作资格的仪器 unqual-查找学生没有操作资格的仪器
+# stuID:学号
+def get_insts(opt,stuID):
     try:
-        conn = get_connect()    # 建立连接和游标
-        cursor = conn.cursor()
-        cursor.execute('select * from student_group where 学号 = %s and 课题组编号 = %s', (studentID,groupID))
-        group = cursor.fetchall()
-    except Exception as e:  # 报错
-        print(e)
-    finally:
-        cursor.close()  # 关闭游标和连接
-        conn.close()
-    if not group:   # 若该学生没有加入该课题组
-        print("该学生没有加入该课题组")
-        return group
-    else:   # 若加入
-        return groupID
+        conn = get_connect();cursor = conn.cursor()
+        if opt == 'qual':
+            cursor.execute('select * from 仪器表 where 仪器名称 in (select 仪器名称 from 仪器申请记录表 where 申请人学号 = %s and 状态 = "s2" and 时间段编号 is NULL)',(stuID,))
+        elif opt == 'unqual':
+            cursor.execute('select * from 仪器表 where 仪器名称 not in (select 仪器名称 from 仪器申请记录表 where 申请人学号 = %s and 状态 = "s2" and 时间段编号 is NULL)',(stuID,))
+        else:
+            print("参数不合法")
 
-# 查找老师的课题组
-def get_group_by_teacher(teacherID):
-    try:
-        conn = get_connect()
-        cursor = conn.cursor()
-        cursor.execute('select * from research_group where 所属教师 = %s', (teacherID,))
-        group = cursor.fetchone()   # 若数据库正常，则查询结果为空或只有一条数据
+        insts = cursor.fetchall()
+        logger.info("get_inst查询结果："+str(insts))
     except Exception as e:
         print(e)
     finally:
-        cursor.close()
-        conn.close()
-    if not group:   # 若所有课题组表中没有属于该教师的课题组的记录，则返回空列表
-        print("该教师不属于任何课题组！")
-        return group
-    else:   # 若该教师有课题组，则返回属性（字典）
-        attr = ("编号","所属教师","名称","类型")
-        group_dict = dict(zip(attr, group))
-        return group_dict
+        cursor.close();conn.close()
+
+# 一个总的获取拥有仪器审批资格人员的函数
+# opt:查询方式 faculty-查找老师审批资格 admin-查找管理员审批资格
+# instID:仪器编号
+def get_qual(opt,instID):
+    try:
+        conn = get_connect();cursor = conn.cursor()
+        if opt == 'faculty':
+            cursor.execute('select 姓名 from 老师表 where 职工号 in (select 职工号 from 老师资格表 where 仪器编号 = %s)',(instID,))
+        elif opt == 'admin':
+            cursor.execute('select 姓名 from 仪器管理员表 where 职工号 in (select 职工号 from 管理员资格表 where 仪器编号 = %s)',(instID,))
+        else:
+            print("参数不合法")
+
+        approvals = cursor.fetchall()
+        logger.info("get_inst查询结果："+str(approvals))
+    except Exception as e:
+        print(e)
+    finally:
+        cursor.close();conn.close()
+
+# 插入新的仪器申请记录
+# 参数：编号，状态，申请人学号，课题组名称，时间段编号，仪器名称，审批人职工号
+def add_inst_record(ID,state,sID,gName,timeID,instName,appID):
+    try:
+        conn = get_connect();cursor = conn.cursor()
+        cursor.execute('insert into 课题申请记录表(编号，状态，申请人学号，课题组名称，时间段编号，仪器名称，审批人职工号) values(%s,%s,%s,%s,%s,%s,%s)',
+                         (ID,state,sID,gName,timeID,instName,appID))
+        conn.commit()
+        logger.info("插入仪器申请："+"编号"+ID+" "+sID+" --> "+appID)
+    except Exception as e:
+        print(e)
+        if conn: conn.rollback()
+    finally:
+        cursor.close();conn.close()
+
+# 查找某个仪器可以选择的预约时间
+# 可以选择的预约时间：其编号不在仪器申请记录表中，或其编号存在，但是状态为“拒绝”
+# 也就是说，只要某条仪器申请记录包含了该时间段，且没有被拒绝，则这个时间段都已经被占用，且不会被释放
+def get_spare_time(instID):
+    try:
+        conn = get_connect();cursor = conn.cursor()
+        cursor.execute('select 时间段编号,起始时间,结束时间 from 仪器可用时间段表 where 仪器编号 = %s', (instID),)
+        times = cursor.fetchall()
+    except Exception as e:
+        print(e)        
+    finally:
+        cursor.close();conn.close()
+
+    return times
+
+# 根据不同身份查找记录
+# opt:身份 applier-发起人 approval-审批人
+# userID:学号或职工号
+def get_records(opt,userID):
+    try:
+        conn = get_connect();cursor = conn.cursor()
+
+        if opt == 'applier':
+            cursor.execute('select * from 仪器申请记录表 where 申请人学号 = %s', (userID,))
+        elif opt == 'approval':
+            cursor.execute('select * from 仪器申请记录表 where 审批人职工号 = %s', (userID,))
+        else:
+            print("不合法参数")
+        records = cursor.fetchall()
+    except Exception as e:
+        print(e)        
+    finally:
+        cursor.close();conn.close()
+    
+    return records
+
+# 查找该学生是否已经加入指定课题组
+# def get_group_by_student(studentID,groupID):
+#     try:
+#         conn = get_connect()    # 建立连接和游标
+#         cursor = conn.cursor()
+#         cursor.execute('select * from student_group where 学号 = %s and 课题组编号 = %s', (studentID,groupID))
+#         group = cursor.fetchall()
+#     except Exception as e:  # 报错
+#         print(e)
+#     finally:
+#         cursor.close()  # 关闭游标和连接
+#         conn.close()
+#     if not group:   # 若该学生没有加入该课题组
+#         print("该学生没有加入该课题组")
+#         return group
+#     else:   # 若加入
+#         return groupID
+
+# # 查找老师的课题组
+# def get_group_by_teacher(teacherID):
+#     try:
+#         conn = get_connect()
+#         cursor = conn.cursor()
+#         cursor.execute('select * from research_group where 所属教师 = %s', (teacherID,))
+#         group = cursor.fetchone()   # 若数据库正常，则查询结果为空或只有一条数据
+#     except Exception as e:
+#         print(e)
+#     finally:
+#         cursor.close()
+#         conn.close()
+#     if not group:   # 若所有课题组表中没有属于该教师的课题组的记录，则返回空列表
+#         print("该教师不属于任何课题组！")
+#         return group
+#     else:   # 若该教师有课题组，则返回属性（字典）
+#         attr = ("编号","所属教师","名称","类型")
+#         group_dict = dict(zip(attr, group))
+#         return group_dict
 
 # 查课题组中的所有学生的个人信息
+# TODO 这个可以和其他函数合并一下？
 def get_students_by_group(groupID):
     try:
         conn = get_connect();cursor = conn.cursor()
