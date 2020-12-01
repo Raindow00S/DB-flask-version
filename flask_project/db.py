@@ -239,6 +239,31 @@ def get_records(opt,userID):
     
     return records
 
+def get_records_num():
+    try:
+        conn = get_connect();cursor = conn.cursor()
+        cursor.execute('select count(*) from 仪器申请记录表')
+        num = cursor.fetchone()
+    except Exception as e:
+        print(e)        
+    finally:
+        cursor.close();conn.close()
+    
+    return num[0]
+
+# 更新仪器申请记录状态
+def update_record_state(recordID,state):
+    try:
+        conn = get_connect();cursor = conn.cursor()
+        cursor.execute('update 仪器申请记录表 set 状态 = %s where 编号 = %s', (state,recordID))
+        conn.commit()
+        logger.info("更新申请状态："+recordID+" --> "+state)
+    except Exception as e:
+        print(e)
+        if conn: conn.rollback()
+    finally:
+        cursor.close();conn.close()
+
 # 查找该学生是否已经加入指定课题组
 # def get_group_by_student(studentID,groupID):
 #     try:
@@ -299,9 +324,8 @@ def get_students_by_group(groupID):
 # 删除学生与课题组的联系
 def remove_student_from_group(studentID, groupID):
     try:
-        conn = get_connect()
-        cursor = conn.cursor()
-        cursor.execute('delete from student_group where 学号 = %s and 课题组编号 = %s', (studentID,groupID))
+        conn = get_connect();cursor = conn.cursor()
+        cursor.execute('delete from 课题成员表 where 学号 = %s and 课题组编号 = %s', (studentID,groupID))
         print("学生"+studentID+"和课题组"+groupID+"的记录已删除")
         conn.commit()
     except Exception as e:
@@ -309,15 +333,13 @@ def remove_student_from_group(studentID, groupID):
         if conn:
             conn.rollback()     # 回溯
     finally:
-        cursor.close()
-        conn.close()
+        cursor.close();conn.close()
 
 # 传入新的名字和类型，更新课题组信息
 def update_group_info(groupID,newName,newType):
     try:
-        conn = get_connect()
-        cursor = conn.cursor()
-        cursor.execute('update research_group set 名称 = %s and 类型 = %s where 编号 = %s', (newName,newType,groupID))
+        conn = get_connect();cursor = conn.cursor()
+        cursor.execute('update 课题组表 set 名称 = %s and 类型 = %s where 编号 = %s', (newName,newType,groupID))
         print("课题组"+groupID+"的信息已更新: "+newName+" "+newType)
         conn.commit()
     except Exception as e:
@@ -325,8 +347,7 @@ def update_group_info(groupID,newName,newType):
         if conn:
             conn.rollback()     # 回溯
     finally:
-        cursor.close()
-        conn.close()
+        cursor.close();conn.close()
 
 # 查所有学生的个人信息
 def get_all_students():

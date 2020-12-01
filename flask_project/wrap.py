@@ -23,3 +23,11 @@ def wrap_one_group(group):
     attr = ["所属教师","编号","名称","类型"]
     group_dict = dict(zip(attr, group))
     return group_dict
+
+# 传入多行仪器预约记录，选出符合状态的记录
+def select_records_by_state(records, state):
+    selected_row = []
+    for row in records:
+        if row[1] == state:
+            selected_row.append(row)
+    return selected_row
