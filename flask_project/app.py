@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # -*- coding:utf-8 -*-
 
-import db
+import db,wrap
 import util
 import json
 from flask import Flask, request, render_template, jsonify
@@ -73,16 +73,16 @@ def login():
         db_user = db.get_user(username)
         logger.info("<数据库传回> "+str(db_user))
         if not db_user:     # 用户账号不存在
-            logger.info("<返回前端>none")
+            # logger.info("<返回前端> none")
             return 'none'
         elif db_user[1] != password:   # 密码错误
-            logger.info("<返回前端>wrong")
+            # logger.info("<返回前端> wrong")
             return 'wrong'
         else:   # 密码正确
             # 设置全局变量
             glo.set_value('glo_userID', username)
             glo.set_value('glo_identity', db_user[2])
-            logger.info("<返回前端>right")
+            # logger.info("<返回前端> right")
             return 'right'
 
 # ================个人信息页(三个身份共用)=====================
@@ -91,7 +91,7 @@ def showInfo():
     # 取个人信息
     glo_userID = glo.get_value('glo_userID')
     glo_identity = glo.get_value('glo_identity')
-    logger.info("<全局变量> glo_userID:"+glo_userID+" glo_identity:"+glo_identity)
+    # logger.info("<全局变量> glo_userID:"+glo_userID+" glo_identity:"+glo_identity)
     db_info = db.get_info(glo_userID, glo_identity)
     logger.info("<数据库传回> "+str(db_info))
 
@@ -113,19 +113,18 @@ def  myGroupStudent():
                            groups = db_groups)
 
 # ================TODO加入课题组=====================
-# 展示所有课题组,发送加入课题组请求
-# TODO另一种方式是只展示未加入的课题组,但使用not in查询失效的问题尚未解决
+# 展示未加入的课题组,发送加入课题组请求
 @app.route('/allgroup', methods=['GET', 'POST'])
 def allGroup():
     if request.method == 'GET':
         # db_groups = db.get_all_groups()
-        # db_groups = db.get_groups(opt='out')
-        db_groups = db.get_groups(opt='all')
+        db_groups = db.get_groups(opt='out',stuID=glo.get_value('glo_userID')) # 我TM大无语……只是忘记传参，结果以为是什么bug改了几小时
+        # db_groups = db.get_groups(opt='all')
         logger.info("<数据库传回> "+str(db_groups))
 
         return render_template('allgroup.html',
                                groups=db_groups)
-    # TODO按钮交互
+    # TODO按钮交互，现在已经不需要判断学生是否已在课题组中（因为不显示了，哈哈！）
     else:   # 当按下加入按钮时，发送过来申请对象课题组的老师ID
         leaderID = request.form.get(
             'leaderID', default='undefined')    # 课题组所属教师ID
@@ -152,11 +151,12 @@ def teacherGroup():
         # 显示教师的课题组信息
         # db_group = db.get_group_by_teacher(userID)
         db_group = db.get_groups(opt='teacher',teaID=glo.get_value('glo_userID'))
-        logger.info("<数据库传回db_group> "+str(db_group))
+        # logger.info("<数据库传回db_group> "+str(db_group))
+        db_group = wrap.wrap_one_group(db_group[1])
+        logger.info("<数据库传回（转变格式后）db_group> "+str(db_group))
+        
         if db_group:
-            #group_id = db_group["编号"]
-            # logger.info("group_id:"+str(group_id))
-            group_id = db_group[1][0]
+            group_id = db_group["编号"]
             # 学生人员信息
             membersInfo = db.get_students_by_group(group_id)
             logger.info("<数据库传回membersInfo> "+str(membersInfo))
@@ -204,7 +204,6 @@ def teacherGroup():
 
             return jsonify(d)
 
-
 if __name__ == '__main__':
     host = util.get_config()["host"]    # 获取配置信息
     port = int(util.get_config()["port"])
@@ -215,6 +214,6 @@ if __name__ == '__main__':
         debug = False
     print(debug)
     glo._init()
-    glo.set_value('glo_userID','undefined')
-    glo.set_value('glo_identity','undefined')
+    glo.set_value('glo_userID','101')
+    glo.set_value('glo_identity','faculty')
     app.run(host=host, port=port, threaded=True, debug=debug)

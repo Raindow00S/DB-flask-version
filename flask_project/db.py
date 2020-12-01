@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import wrap
+
 # 用于输出运行日志
 import logging
 logging.basicConfig(level=logging.INFO, format='127.0.0.1 - - [%(asctime)s - %(name)s - %(levelname)s - %(message)s]')
@@ -39,7 +41,7 @@ def get_user(username):
         conn = get_connect();cursor = conn.cursor()
         cursor.execute('select * from 账号信息表 where 账号 = %s', (username,)) # 这里使用(username)会报错【可是为啥嘞】
         user = cursor.fetchall()
-        logger.info("get_user查询结果："+str(user))
+        # logger.info("get_user查询结果："+str(user))
     except Exception as e:
         print(e)        
     finally:
@@ -62,58 +64,50 @@ def get_info(userID, identity):
         else:
             cursor.execute('select * from 仪器管理员表 where 职工号 = %s', (userID,))
         info = cursor.fetchone()
-        logger.info("get_info查询结果："+str(info))
+        # logger.info("get_info查询结果："+str(info))
     except Exception as e:
         print(e)
     finally:
         cursor.close();conn.close()
     
-    # 将元组中的数据和属性名拼接成字典 属性名:属性值
-    if identity == 'student':
-        attr = ["学号", "姓名", "院系", "专业", "年级"]
-    elif identity == 'faculty':
-        attr = ["职工号", "姓名", "职称"]
-    else:
-        attr = ["职工号", "姓名"]
-    info_dict = dict(zip(attr, info))
-    return info_dict
+    return wrap.wrap_info(info,identity)
 
 # 传入学号,查询该学生所在的所有课题组
-def get_group_stu(stuID):
-    try:
-        conn = get_connect();cursor = conn.cursor()
-        cursor.execute('select * from 课题组表 where 编号 in (select 课题组编号 from 课题成员表 where 学号 = %s)', (stuID,))
-        groups = cursor.fetchall()
-        logger.info("get_group_stu查询结果："+str(groups))
-    except Exception as e:
-        print(e)        
-    finally:
-        cursor.close();conn.close()
+# def get_group_stu(stuID):
+#     try:
+#         conn = get_connect();cursor = conn.cursor()
+#         cursor.execute('select * from 课题组表 where 编号 in (select 课题组编号 from 课题成员表 where 学号 = %s)', (stuID,))
+#         groups = cursor.fetchall()
+#         logger.info("get_group_stu查询结果："+str(groups))
+#     except Exception as e:
+#         print(e)        
+#     finally:
+#         cursor.close();conn.close()
 
-    if not groups:  # TODO若还没有加入的课题组
-        return groups
-    else:   # 若有加入的课题组
-        return groups
+#     if not groups:  # TODO若还没有加入的课题组
+#         return groups
+#     else:   # 若有加入的课题组
+#         return groups
 
 # 获得全部课题组的信息
-def get_all_groups():
-    try:
-        conn = get_connect();cursor = conn.cursor()
-        cursor.execute('select * from research_group')
-        groups = cursor.fetchall()    # 元组列表
-    except Exception as e:  # 报错
-        print(e)
-    finally:
-        cursor.close()  # 关闭游标和连接
-        conn.close()
+# def get_all_groups():
+#     try:
+#         conn = get_connect();cursor = conn.cursor()
+#         cursor.execute('select * from research_group')
+#         groups = cursor.fetchall()    # 元组列表
+#     except Exception as e:  # 报错
+#         print(e)
+#     finally:
+#         cursor.close()  # 关闭游标和连接
+#         conn.close()
     
-    # 添加属性名
-    attr = ["所属教师","编号","名称","类型"]
-    groups.insert(0,attr)
+    # # 添加属性名
+    # attr = ["所属教师","编号","名称","类型"]
+    # groups.insert(0,attr)
     
-    return groups
+    # return groups
 
-# TODO一个总的获取课题组信息的函数
+# 一个总的获取课题组信息的函数
 # opt:查询方式 all-查询全部课题组 in-使用stuID,查找学生在的课题组 out-查找学生不在的课题组 teacher-使用teaID,查找老师的课题组
 # stuID:学号
 # teaID:老师职工号
@@ -122,14 +116,12 @@ def get_groups(opt = 'all', stuID = 'undefined', teaID = 'undefined'):
         conn = get_connect();cursor = conn.cursor()
         
         if opt == 'all':
-            cursor.execute('select * from research_group')
+            cursor.execute('select * from 课题组表')
         elif opt == 'in':
             cursor.execute('select * from 课题组表 where 编号 in (select 课题组编号 from 课题成员表 where 学号 = %s)', (stuID,))
         elif opt == 'out':
-            # TODO这里查询not in没有效果
-            print("opt:out")
+            # 这里查询not in没有效果 # 对不起，是我忘了传参数
             cursor.execute('select * from 课题组表 where 编号 not in (select 课题组编号 from 课题成员表 where 学号 = %s)', (stuID,))
-            # cursor.execute('select * from 课题组表 where not exists (select 课题组编号 from 课题成员表 where 学号 = %s and 编号 = 课题组编号)', (stuID,))
         elif opt == 'teacher':
             cursor.execute('select * from 课题组表 where 所属教师 = %s', (teaID,))
         else:
@@ -141,11 +133,7 @@ def get_groups(opt = 'all', stuID = 'undefined', teaID = 'undefined'):
     finally:
         cursor.close();conn.close()
     
-    # 添加属性名
-    attr = ["所属教师","编号","名称","类型"]
-    groups.insert(0,attr)
-    
-    return groups
+    return wrap.wrap_groups(groups)
 
 
 
