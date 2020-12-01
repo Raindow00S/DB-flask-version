@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # -*- coding:utf-8 -*-
 
-import glo
+import glo  # 全局变量
 from logging import NullHandler
 import db
 import wrap
@@ -15,20 +15,6 @@ logging.basicConfig(level=logging.INFO,
                     format='127.0.0.1 - - [%(asctime)s - %(name)s - %(levelname)s - %(message)s]')
 logger = logging.getLogger(__name__)
 
-# 用于控制全局变量
-
-
-# =====================================
-# 设置全局变量，以在整个登录过程中保存信息方便查找
-# glo_userID = "0" # 账号（学生-学号；教师-职工号；仪器管理员-职工号）
-# glo_identity = "undefined"  # 身份（学生/教师/仪器管理员）
-# glo_userID = "001"   # 学生测试
-#glo_identity = "student"
-# userID = "101"   # 老师测试
-# identity = "faculty"
-# userID = "151"   # 仪器管理员测试
-# identity = "equipment_manager"
-# =====================================
 
 app = Flask(__name__)  # 首先定义一个应用程序 Flask构造函数使用当前模块的名称作为参数
 
@@ -59,7 +45,7 @@ app = Flask(__name__)  # 首先定义一个应用程序 Flask构造函数使用�
 # 定义处理函数
 def form():
       # 引入模板
-    return render_template('index.html'), 200
+    return '首页'
 
 # ================登录页=====================
 @app.route('/login', methods=['GET', 'POST'])
@@ -382,6 +368,5 @@ if __name__ == '__main__':
     glo.set_value('glo_userID', '151')   # 登录的账号
     glo.set_value('glo_identity', 'admin')  # 登录的身份
     record_num = db.get_records_num()
-    # 仪器申请记录表行数（用于新插入记录时，确定记录编号属性）
-    glo.set_value('glo_record_num', record_num)
+    glo.set_value('glo_record_num', record_num) # 仪器申请记录表行数（用于新插入记录时，确定记录编号属性）
     app.run(host=host, port=port, threaded=True, debug=debug)

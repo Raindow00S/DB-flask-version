@@ -72,41 +72,6 @@ def get_info(userID, identity):
     
     return wrap.wrap_info(info,identity)
 
-# 传入学号,查询该学生所在的所有课题组
-# def get_group_stu(stuID):
-#     try:
-#         conn = get_connect();cursor = conn.cursor()
-#         cursor.execute('select * from 课题组表 where 编号 in (select 课题组编号 from 课题成员表 where 学号 = %s)', (stuID,))
-#         groups = cursor.fetchall()
-#         logger.info("get_group_stu查询结果："+str(groups))
-#     except Exception as e:
-#         print(e)        
-#     finally:
-#         cursor.close();conn.close()
-
-#     if not groups:  # TODO若还没有加入的课题组
-#         return groups
-#     else:   # 若有加入的课题组
-#         return groups
-
-# 获得全部课题组的信息
-# def get_all_groups():
-#     try:
-#         conn = get_connect();cursor = conn.cursor()
-#         cursor.execute('select * from research_group')
-#         groups = cursor.fetchall()    # 元组列表
-#     except Exception as e:  # 报错
-#         print(e)
-#     finally:
-#         cursor.close()  # 关闭游标和连接
-#         conn.close()
-    
-    # # 添加属性名
-    # attr = ["所属教师","编号","名称","类型"]
-    # groups.insert(0,attr)
-    
-    # return groups
-
 # 一个总的获取课题组信息的函数
 # opt:查询方式 all-查询全部课题组 in-使用stuID,查找学生在的课题组 out-查找学生不在的课题组 teacher-使用teaID,查找老师的课题组
 # stuID:学号
@@ -263,44 +228,6 @@ def update_record_state(recordID,state):
         if conn: conn.rollback()
     finally:
         cursor.close();conn.close()
-
-# 查找该学生是否已经加入指定课题组
-# def get_group_by_student(studentID,groupID):
-#     try:
-#         conn = get_connect()    # 建立连接和游标
-#         cursor = conn.cursor()
-#         cursor.execute('select * from student_group where 学号 = %s and 课题组编号 = %s', (studentID,groupID))
-#         group = cursor.fetchall()
-#     except Exception as e:  # 报错
-#         print(e)
-#     finally:
-#         cursor.close()  # 关闭游标和连接
-#         conn.close()
-#     if not group:   # 若该学生没有加入该课题组
-#         print("该学生没有加入该课题组")
-#         return group
-#     else:   # 若加入
-#         return groupID
-
-# # 查找老师的课题组
-# def get_group_by_teacher(teacherID):
-#     try:
-#         conn = get_connect()
-#         cursor = conn.cursor()
-#         cursor.execute('select * from research_group where 所属教师 = %s', (teacherID,))
-#         group = cursor.fetchone()   # 若数据库正常，则查询结果为空或只有一条数据
-#     except Exception as e:
-#         print(e)
-#     finally:
-#         cursor.close()
-#         conn.close()
-#     if not group:   # 若所有课题组表中没有属于该教师的课题组的记录，则返回空列表
-#         print("该教师不属于任何课题组！")
-#         return group
-#     else:   # 若该教师有课题组，则返回属性（字典）
-#         attr = ("编号","所属教师","名称","类型")
-#         group_dict = dict(zip(attr, group))
-#         return group_dict
 
 # 查课题组中的所有学生的个人信息
 # TODO 这个可以和其他函数合并一下？
