@@ -1,178 +1,358 @@
 #! /usr/bin/env python
 # -*- coding:utf-8 -*-
 
+import glo  # 全局变量
+from logging import NullHandler
+import db
+import wrap
+import util
+import json
+from flask import Flask, request, render_template, jsonify
 
-# python内置标准模块，用于输出运行日志
+# 用于输出运行日志
 import logging
-logging.basicConfig(level=logging.INFO, format='127.0.0.1 - - [%(asctime)s - %(name)s - %(levelname)s - %(message)s]')
+logging.basicConfig(level=logging.INFO,
+                    format='127.0.0.1 - - [%(asctime)s - %(name)s - %(levelname)s - %(message)s]')
 logger = logging.getLogger(__name__)
 
-from flask import Flask, request, render_template, jsonify
-import json
-import util
-import db
 
-# 【试图设置全局变量，以在整个登录过程中保存信息方便查找】
-# userID = "0" # 账号（学生-学号；教师-职工号；仪器管理员-职工号）
-# identity = "undefined"  # 身份（学生/教师/仪器管理员）
-# userID = "01"   # 学生测试
-# identity = "student"
-userID = "02"   # 老师测试
-identity = "faculty"
-# userID = "03"   # 仪器管理员测试
-# identity = "equipment_manager"
+app = Flask(__name__)  # 首先定义一个应用程序 Flask构造函数使用当前模块的名称作为参数
 
-app = Flask(__name__) #首先定义一个应用程序 Flask构造函数使用当前模块的名称作为参数
-# 路由配置
-# @app.route('/')
-# # 定义处理函数
-# def test():
-#     #处理逻辑
-#     # List = [1,2,3,4,5]
-#     return 'hello,world!'     #响应
-#     # return render_template('test.html',Lst = List), 200
+# ================TODO留作参考注册页=====================
+# @app.route('/signup', methods=['GET', 'POST'])
+# def enroll():
+#     if request.method == 'GET': # 客户端向服务端请求页面
+#         return render_template('enroll.html'), 200
+#     else:   # 若方法为POST，则是从客户端向服务端发送了信息
+#         #接受数据
+#         username = request.form.get('form-username', default='user')
+#         password = request.form.get('form-password', default='pass')
+#         logger.info("注册的用户是："+str(username))     # 用于测试
+#         logger.info("用户的密码是："+str(password))
+#         if db.get_pass(username):   # 应该是若数据库中找到了该数据
+#             return 'existed'
+#         else:   # 若找不到，则新存入该数据
+#             db.save_user(username, password)
+#             return 'ok'
+# ================TODO留作参考用户页=====================
+# @app.route('/user', methods=['POST'])   # 只有服务器接收到信息，才会跳转至/user
+# def login_success():
+#     username = request.form.get('username', default='user')
+#     return render_template('user.html', username=username), 200     # 将用户名传入html进行渲染
 
+# ================TODO首页=====================
 @app.route('/', methods=['GET'])
-#定义处理函数
+# 定义处理函数
 def form():
       # 引入模板
-    return render_template('index.html'), 200
+    return '首页'
 
-@app.route('/signup', methods=['GET', 'POST'])
-def enroll():
-    if request.method == 'GET': # 客户端向服务端请求页面
-        return render_template('enroll.html'), 200
-    else:   # 若方法为POST，则是从客户端向服务端发送了信息
-        #接受数据
-        username = request.form.get('form-username', default='user')
-        password = request.form.get('form-password', default='pass')
-        logger.info("注册的用户是："+str(username))     # 用于测试
-        logger.info("用户的密码是："+str(password))
-        if db.get_pass(username):   # 应该是若数据库中找到了该数据
-            return 'existed'
-        else:   # 若找不到，则新存入该数据
-            db.save_user(username, password)
-            return 'ok'
-
+# ================登录页=====================
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'GET':     # 客户端向服务器请求页面
+    if request.method == 'GET':
         return render_template('login.html'), 200
-    else:   # 客户端向服务器发送表单信息
+
+    else:
         username = request.form.get('form-username', default='user')
         password = request.form.get('form-password', default='pass')
-        logger.info("登录的用户是："+str((username)))
-        logger.info("用户的密码是："+str(password))
-        db_pass = db.get_pass(username)
-        if not db_pass:     # 若数据库中查询到的密码结果为空
+        logger.info("<前端获取> 账号："+str((username))+" 密码："+str(password))
+
+        db_user = db.get_user(username)
+        logger.info("<数据库传回> "+str(db_user))
+        if not db_user:     # 用户账号不存在
+            # logger.info("<返回前端> none")
             return 'none'
-        elif db_pass != password:   # 若密码不对应
+        elif db_user[1] != password:   # 密码错误
+            # logger.info("<返回前端> wrong")
             return 'wrong'
-        else:   # 密码存在且符合
+        else:   # 密码正确
+            # 设置全局变量
+            glo.set_value('glo_userID', username)
+            glo.set_value('glo_identity', db_user[2])
+            # logger.info("<返回前端> right")
             return 'right'
 
-@app.route('/user', methods=['POST'])   # 只有服务器接收到信息，才会跳转至/user
-def login_success():
-    username = request.form.get('username', default='user')
-    return render_template('user.html', username=username), 200     # 将用户名传入html进行渲染
-
-@app.route('/myinfo', methods=['GET','POST'])
+# ================个人信息页(三个身份共用)=====================
+@app.route('/myinfo', methods=['GET'])
 def showInfo():
-    if request.method == 'GET':
-        logger.info("全局变量userID："+userID)
-        logger.info("全局变量identity："+identity)
-        # 根据身份和账号(全局变量)，从数据库取出和身份对应的个人信息，传给前端
-        # 若数据库正常，不会出现找不着的情况
-        db_info = db.get_info(userID, identity) # 返回的是个字典
-        logger.info("获得的信息："+str(db_info))
-        
-        # 传送数据给前端
-        # 【老冯，拆字典的任务就交给你了！】
-        return render_template('myinfo.html',
-                                identity=identity,
-                                info=db_info)
+    # 取个人信息
+    glo_userID = glo.get_value('glo_userID')
+    glo_identity = glo.get_value('glo_identity')
+    # logger.info("<全局变量> glo_userID:"+glo_userID+" glo_identity:"+glo_identity)
+    db_info = db.get_info(glo_userID, glo_identity)
+    logger.info("<数据库传回> "+str(db_info))
 
-@app.route('/allgroup', methods=['GET','POST'])
+    return render_template('myinfo.html',
+                           identity=glo_identity,
+                           info=db_info)
+
+# ================学生=====================
+# ================我的课题组=====================
+# 展示已加入的所有课题组
+@app.route('/mygroup-student', methods=['GET'])
+def myGroupStudent():
+    glo_userID = glo.get_value('glo_userID')
+    #db_groups = db.get_group_stu(glo_userID)
+    db_groups = db.get_groups(opt='in', stuID=glo_userID)
+    logger.info("<数据库传回> "+str(db_groups))
+
+    return render_template('mygroup-student.html',
+                           groups=db_groups)
+
+# ================TODO加入课题组=====================
+# 展示未加入的课题组,发送加入课题组请求
+@app.route('/allgroup', methods=['GET', 'POST'])
 def allGroup():
     if request.method == 'GET':
-        db_groups = db.get_all_groups()
-        logger.info("获得的所有课题组信息："+str(db_groups))
+        # db_groups = db.get_all_groups()
+        db_groups = db.get_groups(opt='out', stuID=glo.get_value(
+            'glo_userID'))  # 我TM大无语……只是忘记传参，结果以为是什么bug改了几小时
+        # db_groups = db.get_groups(opt='all')
+        logger.info("<数据库传回> "+str(db_groups))
 
         return render_template('allgroup.html',
-                                groups=db_groups)
-    else:   # 当按下加入按钮时，发送过来申请对象课题组的老师ID
-        leaderID = request.form.get('leaderID', default='undefined')    # 课题组所属教师ID
-        groupID = request.form.get('groupID',default='undefined')
-        logger.info("申请加入的课题组所属教师ID："+leaderID)
-        logger.info("申请加入的课题组ID："+groupID)
-        # 学生ID在全局变量里面
-        # 【TO DO 查找学生是否已在该课题组中，不在则生成申请记录】
-        # 【若已在，返回joined】
-        # 【若不在，则生成申请记录存入数据库，返回applied】
-        db_group = db.get_group_by_student(userID,groupID)
-        if not db_group:    # 若不在
-            logger.info("插入加入课题组申请："+userID+"-->"+leaderID)
-            db.add_apply_for_group(userID, leaderID)
-            return 'applied'
-        else:
-            logger.info("学生"+userID+"已经加入课题组"+groupID)
-            return 'joined'
+                               groups=db_groups)
 
+    # TODO按钮交互
+    else:
+        # 按下加入按钮，传回选中数据
+        leaderID = request.form.get('leaderID', default='000')    # 所属教师编号
+        groupID = request.form.get('groupID', default='000')  # 课题组编号
+        logger.info("<前端获取>所属教师编号："+leaderID+" 课题组编号："+groupID)
+
+        stuID = glo.get_value('glo_userID')
+        db.add_apply_for_group(stuID, leaderID)
+        return 'applied'
+
+# ================TODO操作资格申请=====================
+@app.route('/applyqual', methods=['GET', 'POST'])
+def applyQual():
+    if request.method == 'GET':
+        # 显示所有未获得操作资格的仪器
+        stuID = glo.get_value('glo_userID')
+        db_insts = db.get_insts(opt='unqual', stuID=stuID)
+
+        return render_template('applyqual.html',
+                               instruments=db_insts)
+    else:
+        # 选中某个仪器，显示可以审批的老师
+        instID = request.form.get('form-instID', default='10001')    # 选中的仪器编号
+        logger.info("<前端获取> 仪器编号："+instID)
+        db_teachers = db.get_qual(opt='faculty', instID=instID)
+        logger.info("<数据库传回>teachers "+str(db_teachers))
+        # TODO 将老师数据返回前端
+
+        # TODO 发送申请
+        # 要插入的新仪器申请记录的参数
+        recordNum = glo.get_value('glo_record_num')
+        glo.set_value('glo_record_num', recordNum+1)
+        recordID = recordNum+1  # 编号
+        state = 's1'    # 状态
+        stuID = glo.get_value('glo_userID')  # 申请人学号
+        groupName = None
+        timeID = None
+        instName = request.form.get(
+            'form-instname', default='default name')    # 仪器名称
+        approvalID = request.form.get(
+            'form-approvalID', default='0000')    # 审批人编号
+
+        db.add_inst_record(recordID, state, stuID, groupName,
+                           timeID, instName, approvalID)
+        return 'applied'
+
+# ================TODO预约申请=====================
+@app.route('/reserve', methods=['GET', 'POST'])
+def reserve():
+    if request.method == 'GET':
+        # 显示所有已获得操作资格的仪器
+        stuID = glo.get_value('glo_userID')
+        db_insts = db.get_insts(opt='qual', stuID=stuID)
+
+        return render_template('applyqual.html',
+                               instruments=db_insts)
+    else:
+        # 选中某个仪器，显示可以审批的仪器管理员、可用时间段和可选课题组
+        instID = request.form.get('form-instID', default='10001')    # 选中的仪器编号
+        logger.info("<前端获取> 仪器编号："+instID)
+
+        db_admins = db.get_qual(opt='admin', instID=instID)
+        logger.info("<数据库传回>db_admins "+str(db_admins))
+        db_times = db.get_spare_time(instID)
+        logger.info("<数据库传回>db_admins "+str(db_times))
+        stuID = glo.get_value('glo_userID')
+        db_groups = db.get_groups(opt='in', stuID=stuID)
+        logger.info("<数据库传回>db_groups "+str(db_groups))
+
+        # TODO 将所有数据返回前端
+
+        # TODO 发送申请
+        # 要插入的新仪器申请记录的参数
+        recordNum = glo.get_value('glo_record_num')
+        glo.set_value('glo_record_num', recordNum+1)
+        recordID = recordNum+1  # 编号
+        state = 's1'    # 状态
+        stuID = glo.get_value('glo_userID')  # 申请人学号
+        groupName = request.form.get(
+            'form-groupname', default='default g name')    # 课题组名称
+        timeID = request.form.get(
+            'form-timeID', default='default timeID')  # 时间段编号
+        instName = request.form.get(
+            'form-instname', default='default i name')    # 仪器名称
+        approvalID = request.form.get(
+            'form-approvalID', default='0000')    # 审批人编号
+
+        db.add_inst_record(recordID, state, stuID, groupName,
+                           timeID, instName, approvalID)
+        return 'applied'
+
+# ================TODO记录与反馈=====================
+@app.route('/record-student', methods=['GET', 'POST'])
+def recordStudent():
+    if request.method == 'GET':
+        stuID = glo.get_value('glo_userID')
+        db_records = db.get_records(opt='applier', userID=stuID)
+        logger.info("<数据库传回>db_records "+str(db_records))
+
+        # TODO 这里所有类型和状态的记录都混在一起……交给前端分开吗？
+        return "unfinnished"
+    else:
+        # TODO 填写反馈
+        return "unfinished"
+
+
+# ================老师=====================
 # 显示教师的课题组信息及人员信息
-@app.route('/mygroup-teacher', methods=['GET','POST'])
+@app.route('/mygroup-teacher', methods=['GET', 'POST'])
 def teacherGroup():
     if request.method == 'GET':
         # 显示教师的课题组信息
-        db_group = db.get_group_by_teacher(userID)
-        # logger.info("db_group:"+str(db_group))
+        # db_group = db.get_group_by_teacher(userID)
+        db_group = db.get_groups(
+            opt='teacher', teaID=glo.get_value('glo_userID'))
+        # logger.info("<数据库传回db_group> "+str(db_group))
+        db_group = wrap.wrap_one_group(db_group[1])
+        logger.info("<数据库传回（转变格式后）db_group> "+str(db_group))
+
         if db_group:
             group_id = db_group["编号"]
-            # logger.info("group_id:"+str(group_id))
             # 学生人员信息
             membersInfo = db.get_students_by_group(group_id)
-            # logger.info("membersInfo:"+str(membersInfo))
-        else: 
-            membersInfo=[]
-        
+            logger.info("<数据库传回membersInfo> "+str(membersInfo))
+        else:
+            membersInfo = []
+
         return render_template('mygroup-teacher.html',
-                                group=db_group,
-                                membersInfo=membersInfo)
-    
+                               group=db_group,
+                               membersInfo=membersInfo)
+
+    # TODO按钮交互
     else:   # 添加/删除了学生 或 修改了课题组信息
-        # 总之先判断一下是什么操作啦
+        # 判断操作
         action = request.form.get('action', default='undefined')
-        # 若操作为删除学生
+        # 若按下删除学生按钮
         if action == "delete":
-            memberID = request.form.get('memberID', default='undefined')
-            groupID = request.form.get('groupID', default='undefined')
-            logger.info("memberID:"+str(memberID)+" groupID:"+str(groupID))
+            memberID = request.form.get(
+                'memberID', default='undefined')    # 选中学生学号
+            groupID = request.form.get('groupID', default='undefined')  # 课题组编号
+            logger.info("<前端获取> memberID:"+str(memberID) +
+                        " groupID:"+str(groupID))
 
             db.remove_student_from_group(memberID, groupID)
             return "deleted"
-        # 若操作为编辑课题组信息
-        elif action=="edit":
-            groupID = request.form.get("groupID",default="undefined")
-            newName = request.form.get("newName",default="undefined")
-            newType = request.form.get("newType",default="undefined")
-            logger.info("groupID:"+str(groupID)+" newName:"+str(newName)+" newType:"+str(newType))
-            db.update_group_info(groupID,newName,newType)
-            return "updated"
-        else:
-            all_students = db.get_all_students()
-            print(type(all_students))
-            logger.info("all_students:"+str(all_students)) # 我晕了……这是个列表，没法return
 
-            index = []
-            for i in range(len(all_students)):
-                index.append(i)
-            logger.info("index:"+str(index))
-            d = dict(zip(index,all_students))
-            logger.info("d:"+str(d))
+        # 若按下保存编辑后的课题组信息按钮
+        elif action == "edit":
+            groupID = request.form.get("groupID", default="undefined")  # 课题组编号
+            newName = request.form.get(
+                "newName", default="undefined")  # 编辑后的课题组名称
+            newType = request.form.get(
+                "newType", default="undefined")  # 编辑后的课题组类型
+            logger.info("<前端获取> groupID:"+str(groupID)+" newName:" +
+                        str(newName)+" newType:"+str(newType))
+            db.update_group_info(groupID, newName, newType)
+            return "updated"
+        # 若新增成员
+        else:
+            # 显示可以加入的成员
+            # 若按下确定按钮后
+            # 若删除课题组
+            # 若创建课题组
+
+            # all_students = db.get_all_students()
+            # print(type(all_students))
+            # # 我晕了……这是个列表，没法return
+            # logger.info("all_students:"+str(all_students))
+
+            # index = []
+            # for i in range(len(all_students)):
+            #     index.append(i)
+            # logger.info("index:"+str(index))
+            # d = dict(zip(index, all_students))
+            # logger.info("d:"+str(d))
 
             return jsonify(d)
 
+# 显示等待教师审批的仪器操作资格申请
+@app.route('/instapprove-teacher', methods=['GET', 'POST'])
+def instApproveTeacher():
+    if request.method == 'GET':
+        facultyID = glo.get_value('glo_userID')
+        db_records = db.get_records(opt='approval', userID=facultyID)
+        db_records = wrap.select_records_by_state(db_records, 's1')
+        logger.info("<数据库传回（转变格式后）db_records> "+str(db_records))
+        return "unfinished"
+    else:
+        # 按下审批通过按钮后，更新仪器申请记录表的状态
+        recordID = request.form.get(
+            'recordID', default='undefined')    # 选中记录编号
+        logger.info("<前端获取> recordID:"+str(recordID))
+        db.update_record_state(recordID, 's2')
 
-        
+        return "unfinished"
+
+# 显示教师的记录与反馈
+@app.route('/record-teacher', methods=['GET', 'POST'])
+def recordTeacher():
+    if request.method == 'GET':
+        teaID = glo.get_value('glo_userID')
+        db_records = db.get_records(opt='approval', userID=teaID)
+        logger.info("<数据库传回>db_records "+str(db_records))
+
+        # TODO 这里所有类型和状态的记录都混在一起……交给前端分开吗？
+        return "unfinished"
+    else:
+        # TODO 在哪里通过课题组的申请？？
+        return "unfinished"
+
+# ================管理员=====================
+# 显示等待管理员审批的仪器操作资格申请
+@app.route('/instapprove-admin', methods=['GET', 'POST'])
+def instApproveAdmin():
+    if request.method == 'GET':
+        adminID = glo.get_value('glo_userID')
+        db_records = db.get_records(opt='approval', userID=adminID)
+        db_records = wrap.select_records_by_state(db_records, 's1')
+        logger.info("<数据库传回（转变格式后）db_records> "+str(db_records))
+        return "unfinished"
+    else:
+        # 按下审批通过按钮后，更新仪器申请记录表的状态
+        recordID = request.form.get(
+            'recordID', default='undefined')    # 选中记录编号
+        logger.info("<前端获取> recordID:"+str(recordID))
+        db.update_record_state(recordID, 's2')
+
+        return "unfinished"
+
+# 显示管理员的记录与反馈
+@app.route('/record-admin', methods=['GET'])
+def recordAdmin():
+    adminID = glo.get_value('glo_userID')
+    db_records = db.get_records(opt='approval', userID=adminID)
+    logger.info("<数据库传回>db_records "+str(db_records))
+
+    # TODO 这里所有类型和状态的记录都混在一起……交给前端分开吗？
+    return "unfinished"
 
 
 if __name__ == '__main__':
@@ -184,4 +364,9 @@ if __name__ == '__main__':
     else:
         debug = False
     print(debug)
+    glo._init()
+    glo.set_value('glo_userID', '151')   # 登录的账号
+    glo.set_value('glo_identity', 'admin')  # 登录的身份
+    record_num = db.get_records_num()
+    glo.set_value('glo_record_num', record_num) # 仪器申请记录表行数（用于新插入记录时，确定记录编号属性）
     app.run(host=host, port=port, threaded=True, debug=debug)
