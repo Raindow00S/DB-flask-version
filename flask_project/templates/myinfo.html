@@ -1,9 +1,268 @@
-<h1>个人信息</h1>
-<table border="1">
-{% for key, value in info.items() %}
-    <tr>
-        <td>{{ key }}</td>
-        <td>{{ value }}</td>
-    </tr>
-{% endfor %}
-</table>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css')}}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/iconfont.css')}}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css')}}" />
+    <script src="{{ url_for('static', filename='js/jquery-1.9.1.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/f.js')}}"></script>
+    <title>个人信息</title>
+</head>
+
+{% if identity=="student" %}
+
+<body>
+    <div class="PublicHead clearfix">
+        <div class="leftBox clearfix">
+            <!--<div class="companyLogo">
+                <img src="images/logo.jpg" />
+            </div>-->
+            <!--<i class="iconfont icon-caidan Js_MenuList"></i>-->
+
+            <div class="companyText">
+                仪器预约管理系统
+            </div>
+        </div>
+        <div class="RightBox clearfix">
+            <div class="UserPhotoBox">
+                <div class="UserPic">
+                    <img src="{{ url_for('static', filename='images/user.jpg')}}" />
+                </div>
+                <div class="UserName">
+                    学生
+                </div>
+            </div>
+            <a href="login.html">
+                <div class="dropOutBox">
+                    <i class="iconfont icon-app_icons--">
+                    </i>
+                    <span>退出</span>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="PublicDownWhole clearfix">
+        <!--左侧-->
+        <div class="leftBox Js_leftBox">
+            <ul>
+                <a href="myinfo.html"> <li class="Select"><i class="iconfont icon-yonghuguanli"></i><span>个人信息</span></li></a>
+                <a href="mygroup-student.html">
+                    <li><i class="iconfont icon-tubiao_dingdan"></i><span>我的课题组</span></li>
+                </a>
+                <a href="allgroup.html">
+                    <li><i class="iconfont icon-fenlei"></i><span>全校课题组</span></li>
+                </a>
+                <a href="instrument.html">      <li><i class="iconfont icon-weibiaoti1"></i><span>仪器预约</span></li></a>
+                <a href="feedback.html">
+                    <li><i class="iconfont icon-tubiao_dingdan"></i><span>记录与反馈</span></li>
+                </a>
+            </ul>
+        </div>
+        <!--右侧-->
+        <div class="RightBox Js_RightBox">
+            <div class="PublicContentBox">
+                <!--公用指向页面名字-->
+                <div class="PublicPointToAgeText">
+                    <span class="span1">个人信息</span><!--<span class="span2">后台用户管理列表</span>-->
+                </div>
+
+            
+              
+                    <!--查询到的表格-->
+
+                    <div class="InquireSelectTable">
+                        <table class="PublicTableCss">
+                        {% for key,value in info.items() %}
+                            <tr>
+                                <td>{{ key }}</td>
+                                <td>{{ value }}</td>
+                            </tr>
+                        {% endfor %}
+                        </table>
+                           
+                            
+
+                    </div>
+                    
+
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!--返回顶部-->
+    <a href="javaScript:void();" class="back-to-top"><i class="iconfont icon-fanhuidingbu"></i> </a>
+</body>
+
+{% elif identity=="teacher" %}
+<body>
+    <div class="PublicHead clearfix">
+        <div class="leftBox clearfix">
+            <!--<div class="companyLogo">
+                <img src="images/logo.jpg" />
+            </div>-->
+            <!--<i class="iconfont icon-caidan Js_MenuList"></i>-->
+
+            <div class="companyText">
+                仪器预约管理系统
+            </div>
+        </div>
+        <div class="RightBox clearfix">
+            <div class="UserPhotoBox">
+                <div class="UserPic">
+                    <img src="{{ url_for('static', filename='images/user.jpg')}}" />
+                </div>
+                <div class="UserName">
+                    老师
+                </div>
+            </div>
+            <a href="login.html">
+                <div class="dropOutBox">
+                    <i class="iconfont icon-app_icons--">
+                    </i>
+                    <span>退出</span>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="PublicDownWhole clearfix">
+        <!--左侧-->
+        <div class="leftBox Js_leftBox">
+            <ul>
+                <a href="myinfo.html"> <li class="Select"><i class="iconfont icon-yonghuguanli"></i><span>个人信息</span></li></a>
+                <a href="mygroup-teacher.html">
+                    <li><i class="iconfont icon-tubiao_dingdan"></i><span>课题组信息</span></li>
+                </a>
+                <a href="instrument.html">      <li><i class="iconfont icon-weibiaoti1"></i><span>仪器预约审批</span></li></a>
+                <a href="feedback.html">
+                    <li><i class="iconfont icon-tubiao_dingdan"></i><span>反馈信息查看</span></li>
+                </a>
+            </ul>
+        </div>
+        <!--右侧-->
+        <div class="RightBox Js_RightBox">
+            <div class="PublicContentBox">
+                <!--公用指向页面名字-->
+                <div class="PublicPointToAgeText">
+                    <span class="span1">个人信息</span><!--<span class="span2">后台用户管理列表</span>-->
+                </div>
+
+            
+              
+                    <!--查询到的表格-->
+
+                    <div class="InquireSelectTable">
+                        <table class="PublicTableCss">
+                        {% for key,value in info.items() %}
+                            <tr>
+                                <td>{{ key }}</td>
+                                <td>{{ value }}</td>
+                            </tr>
+                        {% endfor %}
+                        </table>
+                           
+                            
+
+                    </div>
+                    
+
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!--返回顶部-->
+    <a href="javaScript:void();" class="back-to-top"><i class="iconfont icon-fanhuidingbu"></i> </a>
+</body>
+{% else %}
+<body>
+    <div class="PublicHead clearfix">
+        <div class="leftBox clearfix">
+            <!--<div class="companyLogo">
+                <img src="images/logo.jpg" />
+            </div>-->
+            <!--<i class="iconfont icon-caidan Js_MenuList"></i>-->
+
+            <div class="companyText">
+                仪器预约管理系统
+            </div>
+        </div>
+        <div class="RightBox clearfix">
+            <div class="UserPhotoBox">
+                <div class="UserPic">
+                    <img src="{{ url_for('static', filename='images/user.jpg')}}" />
+                </div>
+                <div class="UserName">
+                    仪器管理员
+                </div>
+            </div>
+            <a href="login.html">
+                <div class="dropOutBox">
+                    <i class="iconfont icon-app_icons--">
+                    </i>
+                    <span>退出</span>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="PublicDownWhole clearfix">
+        <!--左侧-->
+        <div class="leftBox Js_leftBox">
+            <ul>
+                <a href="myinfo.html"> <li class="Select"><i class="iconfont icon-yonghuguanli"></i><span>个人信息</span></li></a>
+                <a href="instrument_list.html">
+                    <li><i class="iconfont icon-tubiao_dingdan"></i><span>仪器列表</span></li>
+                </a>
+                <a href="instrument.html">      <li><i class="iconfont icon-weibiaoti1"></i><span>仪器预约审批</span></li></a>
+            </ul>
+        </div>
+        <!--右侧-->
+        <div class="RightBox Js_RightBox">
+            <div class="PublicContentBox">
+                <!--公用指向页面名字-->
+                <div class="PublicPointToAgeText">
+                    <span class="span1">个人信息</span><!--<span class="span2">后台用户管理列表</span>-->
+                </div>
+
+            
+              
+                    <!--查询到的表格-->
+
+                    <div class="InquireSelectTable">
+                        <table class="PublicTableCss">
+                        {% for key,value in info.items() %}
+                            <tr>
+                                <td>{{ key }}</td>
+                                <td>{{ value }}</td>
+                            </tr>
+                        {% endfor %}
+
+                        </table>
+                           
+                            
+
+                    </div>
+                    
+
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!--返回顶部-->
+    <a href="javaScript:void();" class="back-to-top"><i class="iconfont icon-fanhuidingbu"></i> </a>
+</body>
+{% endif %}
+</html>
