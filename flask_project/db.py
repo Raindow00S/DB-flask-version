@@ -114,12 +114,14 @@ def add_apply_for_group(stuID, leaderID):
         cursor.close();conn.close()
 
 # 一个总的获取仪器信息的函数
-# opt:查询方式 qual-使用stuID,查找学生有操作资格的仪器 unqual-查找学生没有操作资格的仪器
+# opt:查询方式 all-全部 qual-使用stuID,查找学生有操作资格的仪器 unqual-查找学生没有操作资格的仪器
 # stuID:学号
-def get_insts(opt,stuID):
+def get_insts(opt,stuID='0'):
     try:
         conn = get_connect();cursor = conn.cursor()
-        if opt == 'qual':
+        if opt == 'all':
+            cursor.execute('select * from 仪器表')
+        elif opt == 'qual':
             cursor.execute('select * from 仪器表 where 仪器名称 in (select 仪器名称 from 仪器申请记录表 where 申请人学号 = %s and 状态 = "s2" and 时间段编号 is NULL)',(stuID,))
         elif opt == 'unqual':
             cursor.execute('select * from 仪器表 where 仪器名称 not in (select 仪器名称 from 仪器申请记录表 where 申请人学号 = %s and 状态 = "s2" and 时间段编号 is NULL)',(stuID,))
@@ -127,11 +129,12 @@ def get_insts(opt,stuID):
             print("参数不合法")
 
         insts = cursor.fetchall()
-        logger.info("get_inst查询结果："+str(insts))
+        logger.info("get_insts查询结果："+str(insts))
     except Exception as e:
         print(e)
     finally:
         cursor.close();conn.close()
+    return insts
 
 # 一个总的获取拥有仪器审批资格人员的函数
 # opt:查询方式 faculty-查找老师审批资格 admin-查找管理员审批资格
@@ -292,6 +295,19 @@ def get_all_students():
     # print("students:"+str(students))
     return students
 
+# 更新仪器信息
+def update_inst(id,name,type,desc):
+    try:
+        conn = get_connect();cursor = conn.cursor()
+        cursor.execute('update 仪器表 set 仪器名称 = %s,型号规格 = %s,功能描述 = %s where 仪器编号 = %s', (name,type,desc,id))
+        print("仪器"+id+"的信息已更新: "+name+" "+type+" "+desc)
+        conn.commit()
+    except Exception as e:
+        print(e)
+        if conn:
+            conn.rollback()     # 回溯
+    finally:
+        cursor.close();conn.close()
 
 # if __name__ == '__main__':
 #     save_user("xhh", "123")

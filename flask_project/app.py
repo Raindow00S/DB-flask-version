@@ -18,6 +18,28 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)  # 首先定义一个应用程序 Flask构造函数使用当前模块的名称作为参数
 
+@app.route('/demo', methods=['GET', 'POST'])
+def test():
+    # 若是从服务器发送页面给客户端
+    if request.method == 'GET':
+        db_insts = db.get_insts(opt='all')  # 获得全部仪器的数据
+
+        # return '没做完呢'
+        return render_template('demo.html',insts=db_insts)
+    
+    # 若是从客户端发送数据给服务器
+    else:
+        inst_id = request.form.get('inst_id')   # 从ajax的data中又把数据取出来
+        inst_name = request.form.get('inst_name')
+        inst_type = request.form.get('inst_type')
+        inst_desc = request.form.get('inst_desc')
+        logger.info("<前端获取>仪器信息 "+str(inst_id)+" "+str(inst_name)
+                    +" "+str(inst_type)+" "+str(inst_desc)) # 输出看一下
+        db.update_inst(inst_id,inst_name,inst_type,inst_desc)   # 更新数据库
+
+        return "updated"
+
+
 # ================TODO留作参考注册页=====================
 # @app.route('/signup', methods=['GET', 'POST'])
 # def enroll():
