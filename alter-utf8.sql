@@ -1,0 +1,13 @@
+alter table `仪器可用时间段表` convert to character set utf8;
+alter table `仪器申请记录表` convert to character set UTF8;
+alter table `仪器管理员表` convert to character set UTF8;
+alter table `仪器表` convert to character set UTF8;
+alter table `反馈记录表` convert to character set UTF8;
+alter table `学生表` convert to character set UTF8;
+alter table `管理员资格表` convert to character set UTF8;
+alter table `老师表` convert to character set UTF8;
+alter table `老师资格表` convert to character set UTF8;
+alter table `课题成员表` convert to character set UTF8;
+alter table `课题申请记录表` convert to character set UTF8;
+alter table `课题组表` convert to character set UTF8;
+alter table `账号信息表` convert to character set utf8;

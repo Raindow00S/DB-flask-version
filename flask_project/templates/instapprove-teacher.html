@@ -1,3 +1,4 @@
+<!--显示等待教师审批的仪器操作资格申请-->
 <!DOCTYPE html>
 <html>
 <head>
@@ -9,7 +10,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css')}}" />
     <script src="{{ url_for('static', filename='js/jquery-1.9.1.min.js')}}"></script>
     <script src="{{ url_for('static', filename='js/f.js')}}"></script>
-    <title>全校课题组</title>
+    <title>待审批仪器操作申请</title>
 </head>
 <body>
     <div class="PublicHead clearfix">
@@ -29,10 +30,10 @@
                     <img src="{{url_for('static', filename='images/user.jpg')}}" />
                 </div>
                 <div class="UserName">
-                    学生
+                    教师
                 </div>
             </div>
-            <a href="login.html">
+            <a href="/login">
                 <div class="dropOutBox">
                     <i class="iconfont icon-app_icons--">
                     </i>
@@ -47,15 +48,12 @@
         <div class="leftBox Js_leftBox">
             <ul>
                 <a href="/myinfo"> <li><i class="iconfont icon-yonghuguanli"></i><span>个人信息</span></li></a>
-                <a href="/mygroup-student">
-                    <li class="Select"><i class="iconfont icon-tubiao_dingdan"></i><span>我的课题组</span></li>
+                <a href="/mygroup-teacher">
+                    <li class="Select"><i class="iconfont icon-tubiao_dingdan"></i><span>课题组信息</span></li>
                 </a>
-                <a href="/allgroup">
-                    <li><i class="iconfont icon-fenlei"></i><span>全校课题组</span></li>
-                </a>
-                <a href="/instrument">      <li><i class="iconfont icon-weibiaoti1"></i><span>仪器预约</span></li></a>
+                <a href="/instrument">      <li><i class="iconfont icon-weibiaoti1"></i><span>仪器预约审批</span></li></a>
                 <a href="/feedback">
-                    <li><i class="iconfont icon-tubiao_dingdan"></i><span>记录与反馈</span></li>
+                    <li><i class="iconfont icon-tubiao_dingdan"></i><span>反馈信息查看</span></li>
                 </a>
             </ul>
         </div>
@@ -64,7 +62,7 @@
             <div class="PublicContentBox">
                 <!--公用指向页面名字-->
                 <div class="PublicPointToAgeText">
-                    <span class="span1">我的课题组 </span> <span class="span2">课题组管理列表</span>
+                    <span class="span2">待审核操作资格申请列表</span>
                 </div>
                 <!--查询-->
                 <!--<div class="InquireBox clearfix">
@@ -81,7 +79,7 @@
                 <div class="InquireTableBox">
                     <div class="headbox">
                         <div class="headboxtext">
-                            <span class="span1">我的课题组列表</span>
+                            <!-- <span class="span1">我的课题组列表</span> -->
                         </div>
                         <!--批量删除-->
 <!--
@@ -92,7 +90,7 @@
 
                         <div class="PublicBtnIcon Color2Btn fr Js_edit">
                             <i class="iconfont icon-changyongtubiao-mianxing-"></i>
-                            <span>添加</span>
+                            <span>编辑</span>
                         </div>
 -->
                     </div>
@@ -101,30 +99,34 @@
 
                     <div class="InquireSelectTable">
                         <table class="PublicTableCss">
-                            <!-- 属性名 -->
+                            <thead>
                             <tr>
-                                {% for col in groups[0] %}
-                                <td>{{ col }}</td>
-                                {% endfor %} 
+                                <td>编号</td>
+                                <td>状态</td>
+                                <td>申请人学号</td>
+                                <td>仪器名称</td>
+                                <td>操作</td>
                             </tr>
-                            <!-- 属性值 -->
-                            {% for row in groups[1:] %}
+                            </thead>
+
+                            <tbody>
+                            {% for record in records %}
                             <tr>
-                                {% for col in row %}
-                                <td>
-                                    {{ col }}
-                                </td>
-                                {% endfor %}
+                                <td id="record-id">{{ record[0] }}</td>
+                                <td id="record-state">{{ record[1] }}</td>
+                                <td id="record-student">{{ record[2] }}</td>
+                                <td id="record-name">{{ record[5] }}</td>
                                 <td>
                                         
-                                    <div class="PublicTableBtnIcon Color3Btn Js_join">
-                                        <i class="iconfont icon-tubiaozhizuomobanyihuifu-"></i>
-                                        <!--<span>加入</span>-->
-                                        <button type="button" class="btn" id="join">加入</button>
+                                    <div class="PublicTableBtnIcon Color3Btn Js_agree">
+                                        <i class="iconfont icon-tubiaozhizuomobanyihuifu-" id="agree"></i>
+                                        <span>通过</span>
+                                        <!-- <button type="button" class="btn" id="agree">通过</button> -->
                                     </div>
                                 </td>
                             </tr>
                             {% endfor %}
+                            </tbody>
                         </table>
                     </div>
                     <!--分页-->
@@ -145,18 +147,15 @@
                             </div>
                         </div>
                     </div>
-
-
                 </div>
             </div>
-
         </div>
     </div>
 
 
     <!-- alert通用 提示是否删除-->
 
-    <div class="PublicFloatBox f_join">
+    <div class="PublicFloatBox f_agree ">
         <div class="f_MiddleBox wid260">
             <div class="f_Head">
                 <span>提示消息</span>
@@ -168,17 +167,18 @@
 
                 <div class="f_someText">
                     <i class="iconfont icon-tishi"></i>
-                    <span>确定加入此课题组？</span>
+                    <span>确定通过此审批？</span>
+                    <span id="record-id-chosen" hidden="hidden"></span> <!-- 暂时储存选中记录编号的地方，不展示给用户 -->
                 </div>
 
                 <!--按钮-->
 
                 <div class="f_pormatBtn  clearfix">
-                    <div class="f_pormatBtn1">
+                    <div class="f_pormatBtn1" id="pass-teacher">
                         确定
                     </div>
-                    <div class="f_pormatBtn2">
-                        取消
+                    <div class="f_pormatBtn2" id="reject-teacher">
+                        驳回
                     </div>
                 </div>
             </div>
@@ -262,35 +262,37 @@
 
     // 【TO DO 如果是每一行配备一个按钮，那么怎么将这一行的信息存到数据库里面去……】
     // 【1.找到该行课题组的关键数据 2.利用Ajax发回路由函数 3.在路由函数处调用数据库函数】
+  
     $(function() {
         $('.btn').click(function() {    // 这里如果用join id的话，只能取到第一个按钮
             // var leaderID = $(this).parent().prev().val();
-            var leader_content = $(this).parent().parent().children(":first");
-            var group_content = $(this).parent().parent().children().eq(1);
-            leader_content.css('background-color', 'red');
-            group_content.css('background-color', 'blue');
-            var leaderID = leader_content.text();
-            var groupID = group_content.text();
+            var inst_name = $(this).parent().parent().children("#inst-name");
+            var inst_type = $(this).parent().parent().children("#inst-type");
+            inst_name.css('background-color', 'red');
+            inst_type.css('background-color', 'blue');
+            var inst_student = $(this).parent().parent().children("#inst-student");
+            var inst_time = $(this).parent().parent().children("#inst-time");
+            var inst_state = $(this).parent().parent().children("#inst-state");
+
 
             $.ajax({
                 async:"fales",
                 type:"POST",
-                url:"/allgroup",
+                url:"/instapprove-teacher",
                 data: {
-                    "leaderID":leaderID,
-                    "groupID":groupID
+                    "inst-type":inst_type   
                 },
 
                 // 【TO DO 若返回值为joined，弹窗提示已在该课题组中】
                 // 【TO DO 若返回值为applied，弹窗提示申请已发送】
 
-                success:function(data) {
+                /*success:function(data) {
                     if (data == "joined") {
                         $("#message").html('你已经加入该课题组！');
                     } else if (data == "applied") {
                         $("#message").html('您向课题组发送了加入申请，请等待老师批准。');
                     }
-                }
+                }*/
             });
         });
     });

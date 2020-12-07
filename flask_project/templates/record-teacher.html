@@ -1,16 +1,19 @@
+<!--显示教师部分的仪器记录与反馈-->
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css')}}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css')}}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/iconfont.css')}}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css')}}" />
     <script src="{{ url_for('static', filename='js/jquery-1.9.1.min.js')}}"></script>
     <script src="{{ url_for('static', filename='js/f.js')}}"></script>
-    <title>全校课题组</title>
+    <title>记录与反馈</title>
 </head>
+
 <body>
     <div class="PublicHead clearfix">
         <div class="leftBox clearfix">
@@ -29,10 +32,10 @@
                     <img src="{{url_for('static', filename='images/user.jpg')}}" />
                 </div>
                 <div class="UserName">
-                    学生
+                    教师
                 </div>
             </div>
-            <a href="login.html">
+            <a href="/login">
                 <div class="dropOutBox">
                     <i class="iconfont icon-app_icons--">
                     </i>
@@ -46,16 +49,17 @@
         <!--左侧-->
         <div class="leftBox Js_leftBox">
             <ul>
-                <a href="/myinfo"> <li><i class="iconfont icon-yonghuguanli"></i><span>个人信息</span></li></a>
-                <a href="/mygroup-student">
-                    <li class="Select"><i class="iconfont icon-tubiao_dingdan"></i><span>我的课题组</span></li>
+                <a href="/myinfo">
+                    <li><i class="iconfont icon-yonghuguanli"></i><span>个人信息</span></li>
                 </a>
-                <a href="/allgroup">
-                    <li><i class="iconfont icon-fenlei"></i><span>全校课题组</span></li>
+                <a href="/mygroup-teacher">
+                    <li class="Select"><i class="iconfont icon-tubiao_dingdan"></i><span>课题组信息</span></li>
                 </a>
-                <a href="/instrument">      <li><i class="iconfont icon-weibiaoti1"></i><span>仪器预约</span></li></a>
+                <a href="/instrument">
+                    <li><i class="iconfont icon-weibiaoti1"></i><span>仪器预约审批</span></li>
+                </a>
                 <a href="/feedback">
-                    <li><i class="iconfont icon-tubiao_dingdan"></i><span>记录与反馈</span></li>
+                    <li><i class="iconfont icon-tubiao_dingdan"></i><span>反馈信息查看</span></li>
                 </a>
             </ul>
         </div>
@@ -64,7 +68,7 @@
             <div class="PublicContentBox">
                 <!--公用指向页面名字-->
                 <div class="PublicPointToAgeText">
-                    <span class="span1">我的课题组 </span> <span class="span2">课题组管理列表</span>
+                    <span class="span2">仪器记录与反馈列表</span>
                 </div>
                 <!--查询-->
                 <!--<div class="InquireBox clearfix">
@@ -81,10 +85,10 @@
                 <div class="InquireTableBox">
                     <div class="headbox">
                         <div class="headboxtext">
-                            <span class="span1">我的课题组列表</span>
+                            <span class="span1">仪器操作资格审批记录列表</span>
                         </div>
                         <!--批量删除-->
-<!--
+                        <!--
                         <div class="PublicBtnIcon Color5Btn">
                             <i class="iconfont  icon-shanchu"></i>
                             <span>批量删除</span>
@@ -92,7 +96,7 @@
 
                         <div class="PublicBtnIcon Color2Btn fr Js_edit">
                             <i class="iconfont icon-changyongtubiao-mianxing-"></i>
-                            <span>添加</span>
+                            <span>编辑</span>
                         </div>
 -->
                     </div>
@@ -101,30 +105,71 @@
 
                     <div class="InquireSelectTable">
                         <table class="PublicTableCss">
-                            <!-- 属性名 -->
-                            <tr>
-                                {% for col in groups[0] %}
-                                <td>{{ col }}</td>
-                                {% endfor %} 
-                            </tr>
+                            <thead>
+                                <tr>
+                                    <td>编号</td>
+                                    <td>状态</td>
+                                    <td>申请人学号</td>
+                                    <td>仪器名称</td>
+                                </tr>
+                            </thead>
+
                             <!-- 属性值 -->
-                            {% for row in groups[1:] %}
-                            <tr>
-                                {% for col in row %}
-                                <td>
-                                    {{ col }}
-                                </td>
+                            <tbody>
+                                {% for record in a_records %}
+                                <tr>
+                                    <td>{{ record[0] }}</td>
+                                    <td>{{ record[1] }}</td>
+                                    <td>{{ record[2] }}</td>
+                                    <td>{{ record[5] }}</td>
+                                </tr>
                                 {% endfor %}
-                                <td>
-                                        
-                                    <div class="PublicTableBtnIcon Color3Btn Js_join">
-                                        <i class="iconfont icon-tubiaozhizuomobanyihuifu-"></i>
-                                        <!--<span>加入</span>-->
-                                        <button type="button" class="btn" id="join">加入</button>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <br/>
+                    <br/>
+                    <div class="headbox">
+                        <div class="headboxtext">
+                            <span class="span1">课题组成员的仪器预约审批记录列表</span>
+                        </div>
+                        <!--批量删除-->
+                        <!--
+                        <div class="PublicBtnIcon Color5Btn">
+                            <i class="iconfont  icon-shanchu"></i>
+                            <span>批量删除</span>
+                        </div>
+
+                        <div class="PublicBtnIcon Color2Btn fr Js_edit">
+                            <i class="iconfont icon-changyongtubiao-mianxing-"></i>
+                            <span>编辑</span>
+                        </div>
+-->
+                    </div>
+                    <!-- 表格2 -->
+                    <div class="InquireSelectTable">
+                        <table class="PublicTableCss">
+                            <thead>
+                                <tr>
+                                    <td>编号</td>
+                                    <td>状态</td>
+                                    <td>申请人学号</td>
+                                    <td>仪器名称</td>
+                                </tr>
+                            </thead>
+
+                            <!-- 属性值 -->
+                            <tbody>
+                                {% for record in g_records %}
+                                <tr>
+                                    <td>{{ record[0] }}</td>
+                                    <td>{{ record[1] }}</td>
+                                    <td>{{ record[2] }}</td>
+                                    <td>{{ record[5] }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
                         </table>
                     </div>
                     <!--分页-->
@@ -168,7 +213,7 @@
 
                 <div class="f_someText">
                     <i class="iconfont icon-tishi"></i>
-                    <span>确定加入此课题组？</span>
+                    <span>确定通过此审批？</span>
                 </div>
 
                 <!--按钮-->
@@ -178,7 +223,7 @@
                         确定
                     </div>
                     <div class="f_pormatBtn2">
-                        取消
+                        驳回
                     </div>
                 </div>
             </div>
@@ -186,7 +231,7 @@
     </div>
 
     <!--添加用户浮层-->
-<!--
+    <!--
     <div class="PublicFloatBox adduser">
         <div class="f_MiddleBox wid400">
             <div class="f_Head">
@@ -203,8 +248,8 @@
                         <input class="f_p_input" />
                     </div>
 -->
-                    <!--提示消息-->
-<!--
+    <!--提示消息-->
+    <!--
 
                     <div class="f_pormat">
                         请输入正确的ID
@@ -217,9 +262,9 @@
                     <div class="f_alone_input">
                         <input class="f_p_input" />
                     </div>
--->                    
-                    <!--提示消息-->
-<!--                    
+-->
+    <!--提示消息-->
+    <!--                    
                     <div class="f_pormat">
                         请输入正确的分类
                     </div>
@@ -229,8 +274,8 @@
                     </div>
                     <div class="f_alone_input1">
 -->
-                        <!--publicbtn-->
-<!--
+    <!--publicbtn-->
+    <!--
                         <div class="publicf_btn">
                             <div class="publicf_btn1">
                                 确定
@@ -249,6 +294,7 @@
     <!--返回顶部-->
     <a href="javaScript:void();" class="back-to-top"><i class="iconfont icon-fanhuidingbu"></i> </a>
 </body>
+
 </html>
 
 <script src="../static/js/jquery-1.11.1.min.js"></script>
@@ -262,8 +308,9 @@
 
     // 【TO DO 如果是每一行配备一个按钮，那么怎么将这一行的信息存到数据库里面去……】
     // 【1.找到该行课题组的关键数据 2.利用Ajax发回路由函数 3.在路由函数处调用数据库函数】
-    $(function() {
-        $('.btn').click(function() {    // 这里如果用join id的话，只能取到第一个按钮
+    //xyt：下面的函数我没改...
+    $(function () {
+        $('.btn').click(function () {    // 这里如果用join id的话，只能取到第一个按钮
             // var leaderID = $(this).parent().prev().val();
             var leader_content = $(this).parent().parent().children(":first");
             var group_content = $(this).parent().parent().children().eq(1);
@@ -273,18 +320,18 @@
             var groupID = group_content.text();
 
             $.ajax({
-                async:"fales",
-                type:"POST",
-                url:"/allgroup",
+                async: "fales",
+                type: "POST",
+                url: "/allgroup",
                 data: {
-                    "leaderID":leaderID,
-                    "groupID":groupID
+                    "leaderID": leaderID,
+                    "groupID": groupID
                 },
 
                 // 【TO DO 若返回值为joined，弹窗提示已在该课题组中】
                 // 【TO DO 若返回值为applied，弹窗提示申请已发送】
 
-                success:function(data) {
+                success: function (data) {
                     if (data == "joined") {
                         $("#message").html('你已经加入该课题组！');
                     } else if (data == "applied") {

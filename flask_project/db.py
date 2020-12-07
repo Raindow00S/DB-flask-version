@@ -207,6 +207,23 @@ def get_records(opt,userID):
     
     return records
 
+# 根据课题组名字，查找记录
+def get_records_by_groupID(groupName):
+    # print("进入get_records_by_groupID")
+    try:
+        conn = get_connect();cursor = conn.cursor()
+        cursor.execute('select * from 仪器申请记录表 where 课题组名称 = %s', (groupName,))
+        print("查询结果：",end='')
+        print(str(cursor))
+        records = cursor.fetchall()
+    except Exception as e:
+        print(e)        
+    finally:
+        cursor.close();conn.close()
+
+    return records
+    
+
 def get_records_num():
     try:
         conn = get_connect();cursor = conn.cursor()

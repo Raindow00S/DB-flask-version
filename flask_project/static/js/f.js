@@ -1,8 +1,11 @@
 ﻿/// <reference path="jquery-1.9.1.min.js" />
 
+// const { functionsIn } = require("lodash");
+
 $(function () {
+    // 关闭
     $(".Js_closeBtn").click(function () {
-        $(".adduser,.f_delete").fadeOut(200);
+        $(".adduser,.f_delete,.f_agree").fadeOut(200);
     });
     $(".Js_edit").click(function () {
 
@@ -24,6 +27,14 @@ $(function () {
     $(".Js_delete").click(function () {
         $(".f_delete").fadeIn(200);
     });
+    // 老师审批仪器操作资格申请-通过
+    $(".Js_agree").click(function () {
+        var record_id = $(this).parents("tr").find("#record-id");
+        $("#record-id-chosen").text(record_id.text());
+
+        $(".f_agree").fadeIn(200);
+    });
+
 
     // 编辑-确定
     $("#edit-submit").click(function () {
@@ -50,7 +61,46 @@ $(function () {
         });
     });
 
-        //左侧菜单
+    // 老师审批仪器操作资格申请-通过-确定
+    $("#pass-teacher").click(function() {
+        var record_id = $("#record-id-chosen").text();
+        $.ajax({
+            async: "false",
+            type: "POST",
+            url: "/instapprove-teacher",
+            data: {
+                "record-id": record_id,
+                "action": "pass" // 操作为通过
+            },
+            success: function (data) {
+                if (data == "passed") {
+                    alert('审批通过！');
+                    window.location.reload();
+                }
+            }
+        });
+    });
+    
+    // 老师审批仪器操作资格申请-通过-驳回
+    $("#reject-teacher").click(function() {
+        var record_id = $("#record-id-chosen").text();
+        $.ajax({
+            async: "false",
+            type: "POST",
+            url: "/instapprove-teacher",
+            data: {
+                "record-id": record_id,
+                "action": "reject" // 操作为驳回
+            },
+            success: function (data) {
+                if (data == "rejected") {
+                    alert('审批驳回！');
+                    window.location.reload();
+                }
+            }
+        });
+    });
+    //左侧菜单
         //$(".Js_MenuList").click(function () {
         //    if ($(".Js_leftBox").css("left") == "0px") {
         //        $(".Js_RightBox").css("width", "96%");

@@ -237,7 +237,7 @@ def recordStudent():
         logger.info("<数据库传回>db_records "+str(db_records))
 
         # TODO 这里所有类型和状态的记录都混在一起……交给前端分开吗？
-        return "unfinnished"
+        return "unfinished"
     else:
         # TODO 填写反馈
         return "unfinished"
@@ -313,36 +313,52 @@ def teacherGroup():
             # d = dict(zip(index, all_students))
             # logger.info("d:"+str(d))
 
-            return jsonify(d)
+            return "unfinished"
 
 # 显示等待教师审批的仪器操作资格申请
 @app.route('/instapprove-teacher', methods=['GET', 'POST'])
 def instApproveTeacher():
     if request.method == 'GET':
         facultyID = glo.get_value('glo_userID')
-        db_records = db.get_records(opt='approval', userID=facultyID)
-        db_records = wrap.select_records_by_state(db_records, 's1')
+        db_records = db.get_records(opt='approval', userID=facultyID)   # 获得该教师负责审批的记录
+        db_records = wrap.select_records_by_state(db_records, '待处理') # 获得该教师负责审批，且状态为待处理的记录
         logger.info("<数据库传回（转变格式后）db_records> "+str(db_records))
-        return "unfinished"
+        return render_template('instapprove-teacher.html',records=db_records)
     else:
-        # 按下审批通过按钮后，更新仪器申请记录表的状态
-        recordID = request.form.get(
-            'recordID', default='undefined')    # 选中记录编号
+        recordID = request.form.get('record-id')    # 选中记录编号
+        action = request.form.get('action')
         logger.info("<前端获取> recordID:"+str(recordID))
-        db.update_record_state(recordID, 's2')
 
-        return "unfinished"
+        # 按下审批通过按钮后，更新状态->s2（已通过）
+        if action == "pass":
+            # 更新状态
+            db.update_record_state(recordID,"已通过")
+            return "passed"
+        # 驳回->s4（拒绝）
+        else:
+            db.update_record_state(recordID,"拒绝")
+            return "rejected"
 
 # 显示教师的记录与反馈
+# 共三个表：1. 由自己审批的操作资格申请 2.由自己课题组的同学发起的预约申请 3.与表2对应的仪器使用反馈
 @app.route('/record-teacher', methods=['GET', 'POST'])
 def recordTeacher():
     if request.method == 'GET':
+        # db_insts=db.get_insts(opt='all') #获得全部仪器数据（照着晓曦的思路写的...）
         teaID = glo.get_value('glo_userID')
-        db_records = db.get_records(opt='approval', userID=teaID)
-        logger.info("<数据库传回>db_records "+str(db_records))
+        # 由自己审批的操作资格申请
+        db_app_records = db.get_records(opt='approval', userID=teaID)
+        logger.info("<数据库传回>db_app_records "+str(db_app_records))
+        # 由自己课题组的同学发起的预约申请
+        groupName = db.get_groups(opt='teacher',teaID=teaID)[1][2]
+        # print("groupID:"+str(groupID))
+        db_group_records = db.get_records_by_groupID(groupName)
+        logger.info("<数据库传回>db_group_records "+str(db_group_records))
 
         # TODO 这里所有类型和状态的记录都混在一起……交给前端分开吗？
-        return "unfinished"
+        return render_template('record-teacher.html',
+                                a_records=db_app_records,
+                                g_records=db_group_records)
     else:
         # TODO 在哪里通过课题组的申请？？
         return "unfinished"
@@ -387,8 +403,8 @@ if __name__ == '__main__':
         debug = False
     print(debug)
     glo._init()
-    glo.set_value('glo_userID', '151')   # 登录的账号
-    glo.set_value('glo_identity', 'admin')  # 登录的身份
+    glo.set_value('glo_userID', '101')   # 登录的账号
+    glo.set_value('glo_identity', 'faculty')  # 登录的身份
     record_num = db.get_records_num()
     glo.set_value('glo_record_num', record_num) # 仪器申请记录表行数（用于新插入记录时，确定记录编号属性）
     app.run(host=host, port=port, threaded=True, debug=debug)
