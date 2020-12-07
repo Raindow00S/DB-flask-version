@@ -1,16 +1,19 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css')}}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css')}}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/iconfont.css')}}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css')}}" />
     <script src="{{ url_for('static', filename='js/jquery-1.9.1.min.js')}}"></script>
     <script src="{{ url_for('static', filename='js/f.js')}}"></script>
-    <title>产品管理</title>
+    <script src="{{ url_for('static', filename='js/layer.js')}}"></script>
+    <title>管理员-仪器</title>
 </head>
+
 <body>
     <div class="PublicHead clearfix">
         <div class="leftBox clearfix">
@@ -20,19 +23,19 @@
             <!--<i class="iconfont icon-caidan"></i>-->
 
             <div class="companyText">
-                订单管理系统
+                一起预约管理系统
             </div>
         </div>
         <div class="RightBox clearfix">
             <div class="UserPhotoBox">
                 <div class="UserPic">
-                    <img src="images/user.jpg" />
+                    <img src="{{ url_for('static', filename='images/user.jpg')}}" />
                 </div>
                 <div class="UserName">
-                    管理员
+                    仪器管理员
                 </div>
             </div>
-            <a href="index.html">
+            <a href="login">
                 <div class="dropOutBox">
                     <i class="iconfont icon-app_icons--">
                     </i>
@@ -44,16 +47,17 @@
 
     <div class="PublicDownWhole clearfix">
         <!--左侧-->
-        <div class="leftBox">
+        <div class="leftBox Js_leftBox">
             <ul>
-                <a href="UserManagement.html"> <li class=""><i class="iconfont icon-yonghuguanli"></i><span>用户管理</span></li></a>
-                <a href="OrderManagement.html">
-                    <li><i class="iconfont icon-tubiao_dingdan"></i><span>订单管理</span></li>
+                <a href="myinfo">
+                    <li><i class="iconfont icon-yonghuguanli"></i><span>个人信息</span></li>
                 </a>
-                <a href="ClassificationManagement.html">
-                    <li><i class="iconfont icon-fenlei"></i><span>分类管理</span></li>
+                <a href="instrument_list">
+                    <li class="Select"><i class="iconfont icon-tubiao_dingdan"></i><span>仪器列表</span></li>
                 </a>
-                <a href="ProductManagement.html">      <li class="Select"><i class="iconfont icon-weibiaoti1"></i><span>产品管理</span></li></a>
+                <a href="instapprove-admin">
+                    <li><i class="iconfont icon-weibiaoti1"></i><span>仪器预约审批</span></li>
+                </a>
             </ul>
         </div>
         <!--右侧-->
@@ -61,42 +65,18 @@
             <div class="PublicContentBox">
                 <!--公用指向页面名字-->
                 <div class="PublicPointToAgeText">
-                    <span class="span1">产品管理  </span> <span class="span2">后台管理产品列表</span>
+                    <span class="span1">仪器管理列表 </span>
                 </div>
-                <!--查询-->
-                <div class="InquireBox clearfix">
-                    <div class="InquireleftBox">
-                        <div class="Text">产品名称：</div>
-                        <div class="InputDiv">   <input class="phoneInput" placeholder="请输入你需要查询的订单号" /></div>
-                    </div>
-                    <div class="InquireleftBox">
-                        <div class="Text">产品分类：</div>
-                        <div class="InputDiv">
-                            <i class=" iconfont icon-xiala"></i>
-                            <select class="phoneInput">
-                                <option>请选择你的产品分类</option>
-                                <option>1</option>
-                                <option>2</option>
-                                <option>3</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="PublicBtnIcon Color1Btn fr">
-                        <i class="iconfont icon-icon-chaxun"></i>
-                        <span>查询</span>
-                    </div>
-                </div>
+
                 <!--表修改-->
                 <div class="InquireTableBox">
                     <div class="headbox">
+                        <br />
                         <div class="headboxtext">
-                            <span class="span1">后台管理产品列表</span>
+                            <br />
+                            <span class="span1">仪器管理列表</span>
                         </div>
-                        <!--批量删除-->
-                        <div class="PublicBtnIcon Color5Btn">
-                            <i class="iconfont  icon-shanchu"></i>
-                            <span>批量删除</span>
-                        </div>
+
 
                         <div class="PublicBtnIcon Color2Btn fr Js_edit">
                             <i class="iconfont icon-changyongtubiao-mianxing-"></i>
@@ -124,13 +104,14 @@
                             </thead>
 
                             <tbody>
-                                {% for inst in insts %} <!--  遍历取出列表中的每一个仪器的属性元组 -->
+                                {% for inst in insts %}
+                                <!--  遍历取出列表中的每一个仪器的属性元组 -->
                                 <tr>
                                     <td>
                                         <input id="aa" class="inputcheck" type="checkbox" name="inputcheck" />
                                         <label for="aa"></label>
                                     </td>
-                                    
+
                                     <td id="inst-id">{{ inst[0] }}</td>
                                     <td id="inst-name">{{ inst[1] }}</td>
                                     <td id="inst-type">{{ inst[2] }}</td>
@@ -182,30 +163,31 @@
 
     <!-- alert通用 提示是否删除-->
     <div class="PublicFloatBox f_delete">
-     
 
-            <div class="f_MiddleBox wid260">
-                <div class="f_Head">
-                    <span>提示消息</span>
-                    <i class="Js_closeBtn iconfont icon-buoumaotubiao20 fr"></i>
+
+        <div class="f_MiddleBox wid260">
+            <div class="f_Head">
+                <span>提示消息</span>
+                <i class="Js_closeBtn iconfont icon-buoumaotubiao20 fr"></i>
+            </div>
+            <div class="f_content clearfix">
+                <!--提示消息内容-->
+                <div class="f_someText">
+                    <i class="iconfont icon-tishi"></i>
+                    <span>确定删除此信息？</span>
+                    <span id="inst-id-chosen" hidden="hidden"></span> <!-- 暂时储存选中的仪器编号 -->
                 </div>
-                <div class="f_content clearfix">
-                    <!--提示消息内容-->
-                    <div class="f_someText">
-                        <i class="iconfont icon-tishi"></i>
-                        <span>确定删除此信息？</span>
+                <!--按钮-->
+                <div class="f_pormatBtn  clearfix">
+                    <div class="f_pormatBtn1" id="delete-submit">
+                        确定
                     </div>
-                    <!--按钮-->
-                    <div class="f_pormatBtn  clearfix">
-                        <div class="f_pormatBtn1">
-                            确定
-                        </div>
-                        <div class="f_pormatBtn2">
-                            删除
-                        </div>
+                    <div class="f_pormatBtn2 fr Js_closeBtn">
+                        取消
                     </div>
                 </div>
             </div>
+        </div>
 
 
     </div>
@@ -223,12 +205,12 @@
                             仪器编号：
                         </div>
                         <div class="f_alone_input">
-                            <input class="f_p_input" id="input-inst-id" />
+                            <input class="f_p_input" id="input-inst-id" readonly="true"/>
                         </div>
-                        <!--提示消息-->
-                        <!-- <div class="f_pormat">
-                            请输入正确的ID
-                        </div> -->
+                        <!-- 提示消息 -->
+                        <div class="f_pormat">
+                            仪器编号不可编辑！
+                        </div>
                     </div>
                     <div class="f_alonediv">
                         <div class="f_alone_name">
@@ -259,31 +241,123 @@
                             功能描述：
                         </div>
                         <div class="f_alone_input">
-                            <input class="f_p_input"  id="input-inst-desc" />
+                            <input class="f_p_input" id="input-inst-desc" />
                         </div>
                         <!--提示消息-->
                         <!-- <div class="f_pormat">
                             请输入正确的ID
                         </div> -->
-                    <div class="f_alonediv1">
-                        <div class="f_alone_name">
-                        </div>
-                        <div class="f_alone_input1">
-                            <!--publicbtn-->
-                            <div class="publicf_btn">
-                                <div class="publicf_btn1" id="edit-submit">
-                                    确定
-                                </div>
-                                <div class="publicf_btn2 fr Js_closeBtn">
-                                    取消
+                        <div class="f_alonediv1">
+                            <div class="f_alone_name">
+                            </div>
+                            <div class="f_alone_input1">
+                                <!--publicbtn-->
+                                <div class="publicf_btn">
+                                    <div class="publicf_btn1" id="edit-submit">
+                                        确定
+                                    </div>
+                                    <div class="publicf_btn2 fr Js_closeBtn">
+                                        取消
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 </body>
+
 </html>
+
+<script>
+    $(function () {
+        // 鼠标移到缩略文字上时，展现全文，固定时间后消失
+        $("td").on("mouseenter", function () {
+            if (this.offsetWidth < this.scrollWidth) {
+                var that = this;
+                var text = $(this).text();
+                layer.tips(text, that, {
+                    tips: [1, '#fe7844'],
+                    time: 3000         //设置显示时间
+                });
+            }
+        });
+
+        // 编辑
+        $(".Js_edit").click(function () {
+            var inst_id = $(this).parents("tr").find("#inst-id");    // 将有仪器ID的表格存为变量
+            $("#input-inst-id").val(inst_id.text()); // 将表格中的文本放到输入框里
+            // inst_id.css('background-color', 'red');   // 将变量所表示的元素背景变为红色，debug用的，让你知道变量到底存了哪个元素
+
+            var inst_name = $(this).parents("tr").find("#inst-name");   // 仪器名称
+            $("#input-inst-name").val(inst_name.text());
+
+            var inst_type = $(this).parents("tr").find("#inst-type");   // 型号规格
+            $("#input-inst-type").val(inst_type.text());
+
+            var inst_desc = $(this).parents("tr").find("#inst-desc");   // 功能描述
+            $("#input-inst-desc").val(inst_desc.text());
+
+            $(".adduser").fadeIn(200);
+        });
+        
+        // 删除
+        $(".Js_delete").click(function () {
+            var inst_id = $(this).parents("tr").find("#inst-id");
+            inst_id.css('background-color', 'green');
+            $("#inst-id-chosen").text(inst_id.text());
+            //$("#inst-id-chosen").text("测试");
+
+            $(".f_delete").fadeIn(200);
+        });
+
+        // 编辑-确定
+        $("#edit-submit").click(function () {
+            $(this).css('background-color', 'red');
+            var inst_id = $("#input-inst-id").val();    // 取输入框的值
+            var inst_name = $("#input-inst-name").val();
+            var inst_type = $("#input-inst-type").val();
+            var inst_desc = $("#input-inst-desc").val();
+            // 向后端传数据
+            $.ajax({
+                async: "false",
+                type: "POST",
+                url: "/instrument_list",   // 要传给的url
+                data: { // 要传的数据
+                    "inst_id": inst_id,
+                    "inst_name": inst_name,
+                    "inst_type": inst_type,
+                    "inst_desc": inst_desc,
+                    "action": "edit"
+                },
+                success: function (data) {
+                    alert('仪器信息编辑成功！');
+                    window.location.reload();
+                }
+            });
+            $(".adduser").fadeOut(200);
+        });
+
+        //删除-确定
+        $("#delete-submit").click(function () {
+            inst_id = $("#inst-id-chosen").text();
+            $(this).css('background-color', 'red');
+            $.ajax({
+                async: "false",
+                type: "POST",
+                url: "/instrument_list",
+                data: {
+                    "inst_id": inst_id,
+                    "action": "delete"
+                },
+                success: function (data) {
+                    alert('仪器信息删除成功！');
+                    window.location.reload();
+                }
+            });
+            $(".f_delete").fadeOut(200);
+        });
+    });
+</script>

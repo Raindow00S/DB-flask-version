@@ -15,52 +15,7 @@ logging.basicConfig(level=logging.INFO,
                     format='127.0.0.1 - - [%(asctime)s - %(name)s - %(levelname)s - %(message)s]')
 logger = logging.getLogger(__name__)
 
-
 app = Flask(__name__)  # 首先定义一个应用程序 Flask构造函数使用当前模块的名称作为参数
-
-@app.route('/demo', methods=['GET', 'POST'])
-def test():
-    # 若是从服务器发送页面给客户端
-    if request.method == 'GET':
-        db_insts = db.get_insts(opt='all')  # 获得全部仪器的数据
-
-        # return '没做完呢'
-        return render_template('demo.html',insts=db_insts)
-    
-    # 若是从客户端发送数据给服务器
-    else:
-        inst_id = request.form.get('inst_id')   # 从ajax的data中又把数据取出来
-        inst_name = request.form.get('inst_name')
-        inst_type = request.form.get('inst_type')
-        inst_desc = request.form.get('inst_desc')
-        logger.info("<前端获取>仪器信息 "+str(inst_id)+" "+str(inst_name)
-                    +" "+str(inst_type)+" "+str(inst_desc)) # 输出看一下
-        db.update_inst(inst_id,inst_name,inst_type,inst_desc)   # 更新数据库
-
-        return "updated"
-
-
-# ================TODO留作参考注册页=====================
-# @app.route('/signup', methods=['GET', 'POST'])
-# def enroll():
-#     if request.method == 'GET': # 客户端向服务端请求页面
-#         return render_template('enroll.html'), 200
-#     else:   # 若方法为POST，则是从客户端向服务端发送了信息
-#         #接受数据
-#         username = request.form.get('form-username', default='user')
-#         password = request.form.get('form-password', default='pass')
-#         logger.info("注册的用户是："+str(username))     # 用于测试
-#         logger.info("用户的密码是："+str(password))
-#         if db.get_pass(username):   # 应该是若数据库中找到了该数据
-#             return 'existed'
-#         else:   # 若找不到，则新存入该数据
-#             db.save_user(username, password)
-#             return 'ok'
-# ================TODO留作参考用户页=====================
-# @app.route('/user', methods=['POST'])   # 只有服务器接收到信息，才会跳转至/user
-# def login_success():
-#     username = request.form.get('username', default='user')
-#     return render_template('user.html', username=username), 200     # 将用户名传入html进行渲染
 
 # ================TODO首页=====================
 @app.route('/', methods=['GET'])
@@ -364,23 +319,57 @@ def recordTeacher():
         return "unfinished"
 
 # ================管理员=====================
+#显示所属管理员的仪器列表
+@app.route('/instrument_list', methods=['GET', 'POST'])
+def test():
+    # 若是从服务器发送页面给客户端
+    if request.method == 'GET':
+        db_insts = db.get_insts(opt='all')  # 获得全部仪器的数据
+
+        return render_template('instrument_list.html',insts=db_insts)
+    
+    # 若是从客户端发送数据给服务器
+    else:
+        action = request.form.get('action') # 获取操作类型
+        if action == 'edit':    # 编辑
+            inst_id = request.form.get('inst_id')   # 从ajax的data中又把数据取出来
+            inst_name = request.form.get('inst_name')
+            inst_type = request.form.get('inst_type')
+            inst_desc = request.form.get('inst_desc')
+            logger.info("<前端获取>仪器信息 "+str(inst_id)+" "+str(inst_name)
+                        +" "+str(inst_type)+" "+str(inst_desc)) # 输出看一下
+            db.update_inst(inst_id,inst_name,inst_type,inst_desc)   # 更新数据库
+            return "updated"
+
+        elif action == 'delete':    # 删除
+            inst_id = request.form.get('inst_id')
+            db.delete_inst(inst_id)
+            return "deleted"
+
+
 # 显示等待管理员审批的仪器操作资格申请
 @app.route('/instapprove-admin', methods=['GET', 'POST'])
 def instApproveAdmin():
     if request.method == 'GET':
         adminID = glo.get_value('glo_userID')
         db_records = db.get_records(opt='approval', userID=adminID)
-        db_records = wrap.select_records_by_state(db_records, 's1')
+        db_records = wrap.select_records_by_state(db_records, '待处理')
         logger.info("<数据库传回（转变格式后）db_records> "+str(db_records))
-        return "unfinished"
+        return render_template('instapprove-admin.html',records=db_records)
     else:
-        # 按下审批通过按钮后，更新仪器申请记录表的状态
-        recordID = request.form.get(
-            'recordID', default='undefined')    # 选中记录编号
-        logger.info("<前端获取> recordID:"+str(recordID))
-        db.update_record_state(recordID, 's2')
+        action = request.form.get('action')
+        if action == 'pass':    # 按下审批通过按钮后，更新仪器申请记录表的状态
+            recordID = request.form.get('record-id', default='undefined')    # 选中记录编号
+            logger.info("<前端获取> recordID:"+str(recordID))
+            db.update_record_state(recordID, '已通过')
+            return "passed"
+        elif action == 'refuse':
+            recordID = request.form.get('record-id', default='undefined')    # 选中记录编号
+            logger.info("<前端获取> recordID:"+str(recordID))
+            db.update_record_state(recordID, '拒绝')
+            return "refused"
+        return "wrong"
 
-        return "unfinished"
 
 # 显示管理员的记录与反馈
 @app.route('/record-admin', methods=['GET'])
@@ -403,8 +392,8 @@ if __name__ == '__main__':
         debug = False
     print(debug)
     glo._init()
-    glo.set_value('glo_userID', '101')   # 登录的账号
-    glo.set_value('glo_identity', 'faculty')  # 登录的身份
+    glo.set_value('glo_userID', '151')   # 登录的账号
+    glo.set_value('glo_identity', 'admin')  # 登录的身份
     record_num = db.get_records_num()
     glo.set_value('glo_record_num', record_num) # 仪器申请记录表行数（用于新插入记录时，确定记录编号属性）
     app.run(host=host, port=port, threaded=True, debug=debug)

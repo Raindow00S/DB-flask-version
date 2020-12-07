@@ -20,21 +20,6 @@ def get_connect():
     conn = mysql.connector.connect(user=USER, password=PASSWORD, database=DATABASE)    
     return conn
 
-# ==============TODO留作参考注册函数=======================
-# def save_user(username, password):
-#     try:
-#         conn = get_connect()    # 连接mysql数据库
-#         cursor = conn.cursor()  # 新建游标
-#         cursor.execute('insert into users(name, pass) values(%s, %s)', (username, password))    # 存入参数传来的用户名及密码
-#         conn.commit()   # 数据表内容有更新，必须使用到该语句
-#     except Exception as e:  # 若发生错误
-#         print(e)    # 打印错误信息
-#         if conn:    # 【嗯……若连接还在？】
-#             conn.rollback()     # 回溯
-#     finally:
-#         cursor.close()  # 关闭游标
-#         conn.close()    # 关闭mysql数据库连接
-
 # 传入用户账号，确定登录是否成功，传回全局变量
 def get_user(username):
     try:
@@ -222,7 +207,6 @@ def get_records_by_groupID(groupName):
         cursor.close();conn.close()
 
     return records
-    
 
 def get_records_num():
     try:
@@ -318,6 +302,20 @@ def update_inst(id,name,type,desc):
         conn = get_connect();cursor = conn.cursor()
         cursor.execute('update 仪器表 set 仪器名称 = %s,型号规格 = %s,功能描述 = %s where 仪器编号 = %s', (name,type,desc,id))
         print("仪器"+id+"的信息已更新: "+name+" "+type+" "+desc)
+        conn.commit()
+    except Exception as e:
+        print(e)
+        if conn:
+            conn.rollback()     # 回溯
+    finally:
+        cursor.close();conn.close()
+
+# 删除仪器
+def delete_inst(id):
+    try:
+        conn = get_connect();cursor = conn.cursor()
+        cursor.execute('delete from 仪器表 where 仪器编号 = %s',(id,))
+        print("仪器"+id+"的信息已删除")
         conn.commit()
     except Exception as e:
         print(e)

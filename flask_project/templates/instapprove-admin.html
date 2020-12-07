@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css')}}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/iconfont.css')}}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css')}}" />
+    <script src="{{ url_for('static', filename='js/jquery-1.9.1.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/f.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/layer.js')}}"></script>
+    <title>仪器预约审批界面</title>
+</head>
+<body>
+    <div class="PublicHead clearfix">
+        <div class="leftBox clearfix">
+            <!--<div class="companyLogo">
+                <img src="images/logo.jpg" />
+            </div>-->
+            <!--<i class="iconfont icon-caidan"></i>-->
+
+            <div class="companyText">
+                订单管理系统
+            </div>
+        </div>
+        <div class="RightBox clearfix">
+            <div class="UserPhotoBox">
+                <div class="UserPic">
+                    <img src="{{ url_for('static', filename='images/user.jpg')}}" />
+                </div>
+                <div class="UserName">
+                    仪器管理员
+                </div>
+            </div>
+            <a href="login">
+                <div class="dropOutBox">
+                    <i class="iconfont icon-app_icons--">
+                    </i>
+                    <span>退出</span>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="PublicDownWhole clearfix">
+        <!--左侧-->
+        <div class="leftBox Js_leftBox">
+            <ul>
+                <a href="myinfo"> <li><i class="iconfont icon-yonghuguanli"></i><span>个人信息</span></li></a>
+                <a href="instrument_list">
+                    <li><i class="iconfont icon-tubiao_dingdan"></i><span>仪器列表</span></li>
+                </a>
+                <a href="instapprove-admin">      <li class="Select"><i class="iconfont icon-weibiaoti1"></i><span>仪器预约审批</span></li></a>
+            </ul>
+        </div>
+        <!--右侧-->
+        <div class="RightBox">
+            <div class="PublicContentBox">
+                <!--公用指向页面名字-->
+                <div class="PublicPointToAgeText">
+                    <span class="span1">仪器预约审批界面  </span> 
+                </div>
+
+                <!--表修改-->
+                <div class="InquireTableBox">
+                    <div class="headbox">
+                        <br />
+                        <div class="headboxtext">
+                            <br />
+                            <span class="span1">仪器预约审批列表</span>
+                        </div>
+
+                        <!--
+                        <div class="PublicBtnIcon Color2Btn fr Js_edit">
+                            <i class="iconfont icon-changyongtubiao-mianxing-"></i>
+                            <span>添加</span>
+                        </div>
+                        -->
+                    </div>
+
+                    <!--查询到的表格-->
+
+                    <div class="InquireSelectTable">
+                        <table class="PublicTableCss">
+                            <thead>
+                                <tr>
+                                    <td>
+                                        <input id="inputcheck" class="inputcheck" type="checkbox" name="inputcheck" />
+                                        <label for="inputcheck"></label>
+                                        <span>全选</span>
+                                    </td>
+                                    <td>申请记录编号</td>
+                                    <td>申请人学号</td>
+                                    <td>课题组名称</td>
+                                    <td>时间段编号</td>
+                                    <td>申请仪器名称</td>
+                                    <td>操作</td>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {% for record in records %} <!--  遍历取出列表中的每一个仪器的属性元组 -->
+                                {% if record[1]=='待处理' %}
+                                <tr>
+                                    <td>
+                                        <input id="aa" class="inputcheck" type="checkbox" name="inputcheck" />
+                                        <label for="aa"></label>
+                                    </td>
+                                    
+                                    <td id="record-id">{{ record[0] }}</td>
+                                    <td id="student-id">{{ record[2] }}</td>
+                                    <td id="group-name">{{ record[3] }}</td>
+                                    <td id="time">{{ record[4] }}</td>
+                                    <td id="inst-name">{{ record[5] }}</td>
+
+                                    <td>
+                                        <div class="PublicTableBtnIcon Color3Btn Js_pass">
+                                            <i class="iconfont icon-tubiaozhizuomobanyihuifu-"></i>
+                                            <span>通过</span>
+                                        </div>
+
+                                        <div class="PublicTableBtnIcon Color4Btn Js_refuse">
+                                            <i class="iconfont icon-shanchu"></i>
+                                            <span>拒绝</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+
+                    </div>
+                    <!--分页-->
+                    <div class="PageNumber">
+                        <div class="NumbersBox">
+                            <div class="LeftArrow">
+                                上一页
+                            </div>
+                            <ul>
+                                <li class="Select">1</li>
+                                <li class="">2</li>
+                                <li class="">...</li>
+                                <li class="">4</li>
+                                <li class="">5</li>
+                            </ul>
+                            <div class="RightArrow ">
+                                下一页
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- alert通用 提示是否确定通过-->
+    <div class="PublicFloatBox f_pass">
+     
+
+        <div class="f_MiddleBox wid260">
+            <div class="f_Head">
+                <span>提示消息</span>
+                <i class="Js_closeBtn iconfont icon-buoumaotubiao20 fr"></i>
+            </div>
+            <div class="f_content clearfix">
+                <!--提示消息内容-->
+                <div class="f_someText">
+                    <i class="iconfont icon-tishi"></i>
+                    <span>确定通过此申请？</span>
+                    <span id="pass-id" hidden="hidden"></span>
+                </div>
+                <!--按钮-->
+                <div class="f_pormatBtn  clearfix">
+                    <div class="f_pormatBtn1" id="pass-submit">
+                        确定
+                    </div>
+                    <div class="f_pormatBtn2 fr Js_closeBtn2">
+                        取消
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+</div>
+
+
+    <!-- alert通用 提示是否确定拒绝-->
+    <div class="PublicFloatBox f_refuse">
+     
+
+            <div class="f_MiddleBox wid260">
+                <div class="f_Head">
+                    <span>提示消息</span>
+                    <i class="Js_closeBtn iconfont icon-buoumaotubiao20 fr"></i>
+                </div>
+                <div class="f_content clearfix">
+                    <!--提示消息内容-->
+                    <div class="f_someText">
+                        <i class="iconfont icon-tishi"></i>
+                        <span>确定拒绝此申请？</span>
+                        <span id="refuse-id" hidden="hidden"></span>
+                    </div>
+                    <!--按钮-->
+                    <div class="f_pormatBtn  clearfix">
+                        <div class="f_pormatBtn1" id="refuse-submit">
+                            确定
+                        </div>
+                        <div class="f_pormatBtn2 fr Js_closeBtn2">
+                            取消
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+    </div>
+    
+</body>
+</html>
+
+<script>
+    $(function () {
+
+    $("td").on("mouseenter",function() {
+        if (this.offsetWidth < this.scrollWidth) {
+            var that = this;
+            var text = $(this).text();
+            layer.tips(text, that,{
+                tips: [1,'#fe7844'],
+                time: 3000         //设置显示时间
+            });
+        }
+    }); 
+    
+    $(".Js_closeBtn2").click(function () {
+        $(".f_pass,.f_refuse").fadeOut(200);
+    });
+
+    $(".Js_pass").click(function () {
+
+        var record_id = $(this).parents("tr").find("#record-id");    // 将有仪器ID的表格存为变量
+        $("#pass-id").text(record_id.text());
+        record_id.css('background-color', 'red');
+        $(".f_pass").fadeIn(200);
+    });
+    $(".Js_refuse").click(function () {
+        var record_id = $(this).parents("tr").find("#record-id");
+        $("#refuse-id").text(record_id.text());
+        record_id.css('background-color', 'green');
+
+        $(".f_refuse").fadeIn(200);
+    });
+
+    // 通过-确定
+    $("#pass-submit").click(function(){
+        record_id = $("#pass-id").text();
+        $(this).css('background-color', 'red');
+        $.ajax({
+            async:"false",
+            type:"POST",
+            url:"/instapprove-admin",
+            data:{
+                "record-id": record_id,
+                "action": "pass"
+            },
+            success: function(data){
+                alert('通过申请！');
+                window.location.reload();
+            }
+        });
+        $(".f_pass").fadeOut(200);
+    });
+
+    //拒绝-确定
+    $("#refuse-submit").click(function(){
+        record_id = $("#refuse-id").text();
+        $(this).css('background-color', 'red');
+        $.ajax({
+            async:"false",
+            type:"POST",
+            url:"/instapprove-admin",
+            data:{
+                "record-id": record_id,
+                "action": "refuse"
+            },
+            success: function(data){
+                alert('你已拒绝该申请！');
+                window.location.reload();
+            }
+        });
+        $(".f_refuse").fadeOut(200);
+    });
+});
+</script>
