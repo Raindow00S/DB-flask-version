@@ -309,11 +309,23 @@ def recordTeacher():
         # print("groupID:"+str(groupID))
         db_group_records = db.get_records_by_groupID(groupName)
         logger.info("<数据库传回>db_group_records "+str(db_group_records))
+        #获得与2对应的仪器使用反馈编号
+        db_recordsID = db.get_recordsID(groupName)
+        logger.info("<数据库传回>db_recordsID "+str(db_recordsID))
+        #与自己课题组的同学发起的预约申请对应的仪器使用反馈
+        db_feedback = []
+        for i in range(len(db_recordsID)):
+            print("参数："+str(db_recordsID[i][0]))
+            tmp_feedback = db.get_feedback(db_recordsID[i][0])
+            db_feedback.append(tmp_feedback[0])
 
+        # db_feedback = db.get_feedback(db_recordsID)
+        logger.info("<数据库传回>db_feedback "+str(db_feedback))
         # TODO 这里所有类型和状态的记录都混在一起……交给前端分开吗？
         return render_template('record-teacher.html',
                                 a_records=db_app_records,
-                                g_records=db_group_records)
+                                g_records=db_group_records,
+                                t_feedback=db_feedback)
     else:
         # TODO 在哪里通过课题组的申请？？
         return "unfinished"
@@ -392,8 +404,8 @@ if __name__ == '__main__':
         debug = False
     print(debug)
     glo._init()
-    glo.set_value('glo_userID', '151')   # 登录的账号
-    glo.set_value('glo_identity', 'admin')  # 登录的身份
+    # glo.set_value('glo_userID', '001')   # 登录的账号
+    # glo.set_value('glo_identity', 'student')  # 登录的身份
     record_num = db.get_records_num()
     glo.set_value('glo_record_num', record_num) # 仪器申请记录表行数（用于新插入记录时，确定记录编号属性）
     app.run(host=host, port=port, threaded=True, debug=debug)

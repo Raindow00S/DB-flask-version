@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css')}}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/iconfont.css')}}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css')}}" />
+    <script src="{{ url_for('static', filename='js/jquery-1.9.1.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/f.js')}}"></script>
+    <title>操作资格申请</title>
+</head>
+<body>
+    <div class="PublicHead clearfix">
+        <div class="leftBox clearfix">
+            <div class="companyText">
+                仪器预约管理系统
+            </div>
+        </div>
+        <div class="RightBox clearfix">
+            <div class="UserPhotoBox">
+                <div class="UserPic">
+                    <img src="{{url_for('static', filename='images/user.jpg')}}" />
+                </div>
+                <div class="UserName">
+                    学生
+                </div>
+            </div>
+            <a href="login.html">
+                <div class="dropOutBox">
+                    <i class="iconfont icon-app_icons--">
+                    </i>
+                    <span>退出</span>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="PublicDownWhole clearfix">
+        <!--左侧-->
+        <div class="leftBox Js_leftBox">
+            <ul>
+                <a href="myinfo"> 
+                    <li><i class="iconfont icon-yonghuguanli"></i><span>个人信息</span></li>
+                </a>
+                <a href="mygroup-student">
+                    <li><i class="iconfont icon-tubiao_dingdan"></i><span>我的课题组</span></li>
+                </a>
+                <a href="allgroup">
+                    <li><i class="iconfont icon-fenlei"></i><span>全校课题组</span></li>
+                </a>
+                <a href="applyqual">      
+                    <li class="Select"><i class="iconfont icon-weibiaoti1"></i><span>申请操作资格</span></li>
+                </a>
+                <a href="reserve">
+                    <li><i class="iconfont icon-tubiao_dingdan"></i><span>仪器预约</span></li>
+                </a>
+                <a href="record-student">
+                    <li><i class="iconfont icon-tubiao_dingdan"></i><span>记录与反馈</span></li>
+                </a>
+            </ul>
+        </div>
+        <!--右侧-->
+        <div class="RightBox Js_RightBox">
+            <div class="PublicContentBox">
+                <!--公用指向页面名字-->
+                <div class="PublicPointToAgeText">
+                    <span class="span1">资格申请 </span> <span class="span2">仪器预约</span>
+                </div>
+                <!--查询无操作资格仪器-->
+                <div class="InquireTableBox">
+                    <div class="headbox">
+                        <div class="headboxtext">
+                            <span class="span1">仪器列表</span>
+                        </div>
+                    </div>
+                    <div class="InquireSelectTable">
+                        <table class="PublicTableCss">
+                            <!-- 属性名 -->
+                            <thead>
+                                <tr>
+                                    <td>仪器编号</td>
+                                    <td>仪器名称</td>
+                                    <td>型号规格</td>
+                                    <td>功能描述</td>
+                                    <td>操作</td>
+                                </tr>
+                            </thead>
+                            <!-- 属性值 -->
+                            {% for row in instruments[0:] %}
+                            <tr>
+                                {% for col in row %}
+                                <td>
+                                    {{ col }}
+                                </td>
+                                {% endfor %}
+                                <td>
+                                    <div class="PublicTableBtnIcon Color3Btn Js_join">
+                                        <i class="iconfont icon-tubiaozhizuomobanyihuifu-"></i>
+                                        <button type="button" class="btn" id="join">申请</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                    <!--分页-->
+                    <div class="PageNumber">
+                        <div class="NumbersBox">
+                            <div class="LeftArrow">
+                                上一页
+                            </div>
+                            <ul>
+                                <li class="Select">1</li>
+                                <li class="">2</li>
+                                <li class="">...</li>
+                                <li class="">4</li>
+                                <li class="">5</li>
+                            </ul>
+                            <div class="RightArrow ">
+                                下一页
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- alert通用 提示-->
+
+    <div class="PublicFloatBox f_join">
+        <div class="f_MiddleBox wid260">
+            <div class="f_Head">
+                <span>提示消息</span>
+                <i class="Js_closeBtn iconfont icon-buoumaotubiao20 fr"></i>
+            </div>
+            <div class="f_content clearfix">
+
+                <!--提示消息内容-->
+
+                <div class="f_someText">
+                    <i class="iconfont icon-tishi"></i>
+                    <span>确定申请此仪器操作资格？</span>
+                </div>
+
+                <!--按钮-->
+
+                <div class="f_pormatBtn  clearfix">
+                    <div class="f_pormatBtn1">
+                        确定
+                    </div>
+                    <div class="f_pormatBtn2">
+                        取消
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--返回顶部-->
+    <a href="javaScript:void();" class="back-to-top"><i class="iconfont icon-fanhuidingbu"></i> </a>
+</body>
+</html>
+
+<script src="../static/js/jquery-1.11.1.min.js"></script>
+<script>
+
+    $(function() {
+        $('.btn').click(function() {    // 这里如果用join id的话，只能取到第一个按钮
+            // var leaderID = $(this).parent().prev().val();
+            var leader_content = $(this).parent().parent().children(":first");
+            var group_content = $(this).parent().parent().children().eq(1);
+            leader_content.css('background-color', 'red');
+            group_content.css('background-color', 'blue');
+            var leaderID = leader_content.text();
+            var groupID = group_content.text();
+
+            $.ajax({
+                async:"fales",
+                type:"POST",
+                url:"/allgroup",
+                data: {
+                    "leaderID":leaderID,
+                    "groupID":groupID
+                },
+
+                // 【TO DO 若返回值为joined，弹窗提示已在该课题组中】
+                // 【TO DO 若返回值为applied，弹窗提示申请已发送】
+
+                success:function(data) {
+                    if (data == "joined") {
+                        $("#message").html('你已经加入该课题组！');
+                    } else if (data == "applied") {
+                        $("#message").html('您向课题组发送了加入申请，请等待老师批准。');
+                    }
+                }
+            });
+        });
+    });
+</script>

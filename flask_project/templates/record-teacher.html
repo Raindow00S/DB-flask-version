@@ -35,7 +35,7 @@
                     教师
                 </div>
             </div>
-            <a href="/login">
+            <a href="login">
                 <div class="dropOutBox">
                     <i class="iconfont icon-app_icons--">
                     </i>
@@ -49,17 +49,13 @@
         <!--左侧-->
         <div class="leftBox Js_leftBox">
             <ul>
-                <a href="/myinfo">
-                    <li><i class="iconfont icon-yonghuguanli"></i><span>个人信息</span></li>
+                <a href="myinfo"> <li><i class="iconfont icon-yonghuguanli"></i><span>个人信息</span></li></a>
+                <a href="mygroup-teacher">
+                    <li><i class="iconfont icon-tubiao_dingdan"></i><span>课题组信息</span></li>
                 </a>
-                <a href="/mygroup-teacher">
-                    <li class="Select"><i class="iconfont icon-tubiao_dingdan"></i><span>课题组信息</span></li>
-                </a>
-                <a href="/instrument">
-                    <li><i class="iconfont icon-weibiaoti1"></i><span>仪器预约审批</span></li>
-                </a>
-                <a href="/feedback">
-                    <li><i class="iconfont icon-tubiao_dingdan"></i><span>反馈信息查看</span></li>
+                <a href="instapprove-teacher">      <li><i class="iconfont icon-weibiaoti1"></i><span>审批操作资格</span></li></a>
+                <a href="record-teacher">
+                    <li class="Select"><i class="iconfont icon-tubiao_dingdan"></i><span>查看反馈信息</span></li>
                 </a>
             </ul>
         </div>
@@ -87,18 +83,6 @@
                         <div class="headboxtext">
                             <span class="span1">仪器操作资格审批记录列表</span>
                         </div>
-                        <!--批量删除-->
-                        <!--
-                        <div class="PublicBtnIcon Color5Btn">
-                            <i class="iconfont  icon-shanchu"></i>
-                            <span>批量删除</span>
-                        </div>
-
-                        <div class="PublicBtnIcon Color2Btn fr Js_edit">
-                            <i class="iconfont icon-changyongtubiao-mianxing-"></i>
-                            <span>编辑</span>
-                        </div>
--->
                     </div>
 
                     <!--查询到的表格-->
@@ -134,18 +118,6 @@
                         <div class="headboxtext">
                             <span class="span1">课题组成员的仪器预约审批记录列表</span>
                         </div>
-                        <!--批量删除-->
-                        <!--
-                        <div class="PublicBtnIcon Color5Btn">
-                            <i class="iconfont  icon-shanchu"></i>
-                            <span>批量删除</span>
-                        </div>
-
-                        <div class="PublicBtnIcon Color2Btn fr Js_edit">
-                            <i class="iconfont icon-changyongtubiao-mianxing-"></i>
-                            <span>编辑</span>
-                        </div>
--->
                     </div>
                     <!-- 表格2 -->
                     <div class="InquireSelectTable">
@@ -167,6 +139,36 @@
                                     <td>{{ record[1] }}</td>
                                     <td>{{ record[2] }}</td>
                                     <td>{{ record[5] }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <br/>
+                    <br/>
+                    <div class="headbox">
+                        <div class="headboxtext">
+                            <span class="span1">反馈记录列表</span>
+                        </div>
+                    </div>
+                    <!--表格3：与表2对应的仪器使用反馈-->
+                    <div class="InquireSelectTable">
+                        <table class="PublicTableCss">
+                            <thead>
+                                <tr>
+                                    <td>编号</td>
+                                    <td>反馈</td>
+                                </tr>
+                            </thead>
+
+                            <!-- 属性值 -->
+                            <tbody>
+                                {% for feedback in t_feedback %}
+                                <tr>
+                                    <td>{{ feedback[0] }}</td>
+                                    <td>{{ feedback[1] }}</td>
+                                    
                                 </tr>
                                 {% endfor %}
                             </tbody>

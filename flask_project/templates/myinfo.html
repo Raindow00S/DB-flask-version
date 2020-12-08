@@ -35,7 +35,7 @@
                     学生
                 </div>
             </div>
-            <a href="login.html">
+            <a href="login">
                 <div class="dropOutBox">
                     <i class="iconfont icon-app_icons--">
                     </i>
@@ -49,15 +49,18 @@
         <!--左侧-->
         <div class="leftBox Js_leftBox">
             <ul>
-                <a href="myinfo.html"> <li class="Select"><i class="iconfont icon-yonghuguanli"></i><span>个人信息</span></li></a>
-                <a href="mygroup-student.html">
+                <a href="myinfo"> <li class="Select"><i class="iconfont icon-yonghuguanli"></i><span>个人信息</span></li></a>
+                <a href="mygroup-student">
                     <li><i class="iconfont icon-tubiao_dingdan"></i><span>我的课题组</span></li>
                 </a>
-                <a href="allgroup.html">
+                <a href="allgroup">
                     <li><i class="iconfont icon-fenlei"></i><span>全校课题组</span></li>
                 </a>
-                <a href="instrument.html">      <li><i class="iconfont icon-weibiaoti1"></i><span>仪器预约</span></li></a>
-                <a href="feedback.html">
+                <a href="applyqual">      <li><i class="iconfont icon-weibiaoti1"></i><span>申请操作资格</span></li></a>
+                <a href="reserve">
+                    <li><i class="iconfont icon-tubiao_dingdan"></i><span>仪器预约</span></li>
+                </a>
+                <a href="record-student">
                     <li><i class="iconfont icon-tubiao_dingdan"></i><span>记录与反馈</span></li>
                 </a>
             </ul>
@@ -67,7 +70,7 @@
             <div class="PublicContentBox">
                 <!--公用指向页面名字-->
                 <div class="PublicPointToAgeText">
-                    <span class="span1">个人信息</span><!--<span class="span2">后台用户管理列表</span>-->
+                    <span style="color: coral; text-align: center;display:block;" class="span1">个人信息</span><!--<span class="span2">后台用户管理列表</span>-->
                 </div>
 
             
@@ -75,18 +78,30 @@
                     <!--查询到的表格-->
 
                     <div class="InquireSelectTable">
-                        <table class="PublicTableCss">
-                        {% for key,value in info.items() %}
-                            <tr>
-                                <td>{{ key }}</td>
-                                <td>{{ value }}</td>
-                            </tr>
-                        {% endfor %}
-                        </table>
-                           
+                        <table style="margin: auto;" class="PublicTableCss">
                             
+                            <thead>
+                                <tr>
+                                    {% for key in info.keys() %}
+                                    <td>{{ key }}</td>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody> 
+                                <tr>
+                                    {% for value in info.values() %}
+                                    <td>
+                                        {{ value }}
+                                    </td>
+                                    {% endfor %}
+                                </tr>
+                            </tbody>
 
+
+                        </table>
+                        <br /><br />
                     </div>
+
                     
 
 
@@ -100,7 +115,7 @@
     <a href="javaScript:void();" class="back-to-top"><i class="iconfont icon-fanhuidingbu"></i> </a>
 </body>
 
-{% elif identity=="teacher" %}
+{% elif identity=="faculty" %}
 <body>
     <div class="PublicHead clearfix">
         <div class="leftBox clearfix">
@@ -122,7 +137,7 @@
                     老师
                 </div>
             </div>
-            <a href="login.html">
+            <a href="login">
                 <div class="dropOutBox">
                     <i class="iconfont icon-app_icons--">
                     </i>
@@ -136,13 +151,13 @@
         <!--左侧-->
         <div class="leftBox Js_leftBox">
             <ul>
-                <a href="/myinfo"> <li><i class="iconfont icon-yonghuguanli"></i><span>个人信息</span></li></a>
-                <a href="/mygroup-teacher">
-                    <li class="Select"><i class="iconfont icon-tubiao_dingdan"></i><span>课题组信息</span></li>
+                <a href="myinfo"> <li class="Select"><i class="iconfont icon-yonghuguanli"></i><span>个人信息</span></li></a>
+                <a href="mygroup-teacher">
+                    <li><i class="iconfont icon-tubiao_dingdan"></i><span>课题组信息</span></li>
                 </a>
-                <a href="/instrument">      <li><i class="iconfont icon-weibiaoti1"></i><span>仪器预约审批</span></li></a>
-                <a href="/feedback">
-                    <li><i class="iconfont icon-tubiao_dingdan"></i><span>反馈信息查看</span></li>
+                <a href="instapprove-teacher">      <li><i class="iconfont icon-weibiaoti1"></i><span>审批操作资格</span></li></a>
+                <a href="record-teacher">
+                    <li><i class="iconfont icon-tubiao_dingdan"></i><span>查看反馈信息</span></li>
                 </a>
             </ul>
         </div>
@@ -151,7 +166,7 @@
             <div class="PublicContentBox">
                 <!--公用指向页面名字-->
                 <div class="PublicPointToAgeText">
-                    <span class="span1">个人信息</span><!--<span class="span2">后台用户管理列表</span>-->
+                    <span style="color: coral; text-align: center;display:block;" class="span1">个人信息</span><!--<span class="span2">后台用户管理列表</span>-->
                 </div>
 
             
@@ -159,18 +174,30 @@
                     <!--查询到的表格-->
 
                     <div class="InquireSelectTable">
-                        <table class="PublicTableCss">
-                        {% for key,value in info.items() %}
-                            <tr>
-                                <td>{{ key }}</td>
-                                <td>{{ value }}</td>
-                            </tr>
-                        {% endfor %}
-                        </table>
-                           
+                        <table style="margin: auto;" class="PublicTableCss">
                             
+                            <thead>
+                                <tr>
+                                    {% for key in info.keys() %}
+                                    <td>{{ key }}</td>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody> 
+                                <tr>
+                                    {% for value in info.values() %}
+                                    <td>
+                                        {{ value }}
+                                    </td>
+                                    {% endfor %}
+                                </tr>
+                            </tbody>
 
+
+                        </table>
+                        <br /><br />
                     </div>
+
                     
 
 
@@ -205,7 +232,7 @@
                     仪器管理员
                 </div>
             </div>
-            <a href="login.html">
+            <a href="login">
                 <div class="dropOutBox">
                     <i class="iconfont icon-app_icons--">
                     </i>
@@ -219,11 +246,11 @@
         <!--左侧-->
         <div class="leftBox Js_leftBox">
             <ul>
-                <a href="myinfo.html"> <li class="Select"><i class="iconfont icon-yonghuguanli"></i><span>个人信息</span></li></a>
-                <a href="instrument_list.html">
+                <a href="myinfo"> <li class="Select"><i class="iconfont icon-yonghuguanli"></i><span>个人信息</span></li></a>
+                <a href="instrument_list">
                     <li><i class="iconfont icon-tubiao_dingdan"></i><span>仪器列表</span></li>
                 </a>
-                <a href="instrument.html">      <li><i class="iconfont icon-weibiaoti1"></i><span>仪器预约审批</span></li></a>
+                <a href="instapprove-admin">      <li><i class="iconfont icon-weibiaoti1"></i><span>仪器预约审批</span></li></a>
             </ul>
         </div>
         <!--右侧-->
@@ -231,7 +258,7 @@
             <div class="PublicContentBox">
                 <!--公用指向页面名字-->
                 <div class="PublicPointToAgeText">
-                    <span class="span1">个人信息</span><!--<span class="span2">后台用户管理列表</span>-->
+                    <span style="color: coral; text-align: center;display:block;" class="span1">个人信息</span><!--<span class="span2">后台用户管理列表</span>-->
                 </div>
 
             
@@ -239,19 +266,30 @@
                     <!--查询到的表格-->
 
                     <div class="InquireSelectTable">
-                        <table class="PublicTableCss">
-                        {% for key,value in info.items() %}
-                            <tr>
-                                <td>{{ key }}</td>
-                                <td>{{ value }}</td>
-                            </tr>
-                        {% endfor %}
+                        <table style="margin: auto;" class="PublicTableCss">
+                            
+                            <thead>
+                                <tr>
+                                    {% for key in info.keys() %}
+                                    <td>{{ key }}</td>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody> 
+                                <tr>
+                                    {% for value in info.values() %}
+                                    <td>
+                                        {{ value }}
+                                    </td>
+                                    {% endfor %}
+                                </tr>
+                            </tbody>
+
 
                         </table>
-                           
-                            
-
+                        <br /><br />
                     </div>
+
                     
 
 

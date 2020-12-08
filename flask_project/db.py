@@ -141,6 +141,31 @@ def get_qual(opt,instID):
     finally:
         cursor.close();conn.close()
 
+#通过课题组名称获得申请记录编号
+def get_recordsID(groupName):
+    try:
+        conn = get_connect();cursor = conn.cursor()
+        cursor.execute('select 编号 from 仪器申请记录表 where 课题组名称 = %s',(groupName,))
+        recordsID = cursor.fetchall()
+    except Exception as e:
+        print(e)
+    finally:
+        cursor.close();conn.close()
+    return recordsID
+
+#通过申请记录编号获得反馈记录信息
+def get_feedback(recordID):
+    try:
+        conn = get_connect();cursor = conn.cursor()
+        cursor.execute('select * from 反馈记录表 where 编号 = %s', (recordID,))
+        feedback = cursor.fetchall()
+    except Exception as e:
+        print(e)        
+    finally:
+        cursor.close();conn.close()
+
+    return feedback
+
 # 插入新的仪器申请记录
 # 参数：编号，状态，申请人学号，课题组名称，时间段编号，仪器名称，审批人职工号
 def add_inst_record(ID,state,sID,gName,timeID,instName,appID):
